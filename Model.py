@@ -28,8 +28,8 @@ class Model:
         """
         Runs a specific function using a set of arguments. Uses them across different threads. Is the starmap-version of imap.
         @func: the function being applied to the arguments 
-        @iterable: 
-        @chunksize: 
+        @iterable: the arguments **question
+        @chunksize: the number of arguments to pass to the function on each thread **question
         """
 
         self._check_running()
@@ -86,11 +86,11 @@ class Model:
         """
         Runs a parallel simulation on a set of parameters given a specific function. 
 
-        @function (str): 
-        @parameters (dict): 
-        @nTrials (int):
-        @cores (int): 
-        @bins (int): 
+        @function (str): the model being simulated
+        @parameters (dict): the parameters that will be input into the function being simulated
+        @nTrials (int): total number of trials to be distributed across the cores
+        @cores (int): the number of cores to distribute the simulation trials across
+        @bins (int): the number of groups that the trials are broken into to be distributed across the cores
         """
         jobs=[]
         results = []
