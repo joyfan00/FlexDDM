@@ -1,15 +1,37 @@
 # packages 
-from abc import ABC
+import pandas as pd
+import numpy as np
+import random
+import sys
+import math
 
 """
-This class is an abstract class that provides the structure of what functions 
-each model class should contain.
+This class is a parent class that provides the structure of what functions 
+each specific model class should contain.
 """
 
-class Model (ABC):
-    def istarmap(self, func, iterable, chunksize=1):
-        """starmap-version of imap
+class Model:
+
+    global param_number
+    global bounds
+
+    def __init__(self, param_number, bounds):
         """
+        Initializes a model object. 
+        @param_number (int): the number of parameters (also known as variables) necessary for model 
+        @bounds (list of tuples): bounds necessary for model fitting
+        """
+        self.param_number = param_number
+        self.bounds = bounds
+
+    def istarmap(self, func, iterable, chunksize=1):
+        """
+        Runs a specific function using a set of arguments. Uses them across different threads. Is the starmap-version of imap.
+        @func: the function being applied to the arguments 
+        @iterable: 
+        @chunksize: 
+        """
+
         self._check_running()
         if chunksize < 1:
             raise ValueError(
@@ -27,8 +49,20 @@ class Model (ABC):
             ))
         return (item for chunk in result for item in chunk)
 
-    @abstractmethod
-    def model_simulation():
+    def model_simulation(self, parameters, dt, var, nTrials):
+        """
+        Base code for a model simulation. 
+        @parameters (dict): contains a dictionary of variables to their associated values  
+        @dt (float): time difference
+        @var (float): variance 
+        @nTrials (float): number of trials running simulations on
+        """
+        # define variables 
+        alpha = parameters['alpha']
+        delta = parameters['delta']
+        tau = parameters['tau']
+        beta = parameters['beta']
+
         choicelist = []
         rtlist = []
         #sample a bunch of possible updates to evidence with each unit of time dt. Updates are centered
@@ -47,32 +81,82 @@ class Model (ABC):
                 choicelist.append(0) # choose the lower threshold action
             rtlist.append(t)
         return (range(1, nTrials+1), choicelist, rtlist, congruencylist)
+
+    def parallel_sim(self, function, parameters, nTrials=5000, cores=4, bins=4):
+        """
+        Runs a parallel simulation on a set of parameters given a specific function. 
+
+        @function (str): 
+        @parameters (dict): 
+        @nTrials (int):
+        @cores (int): 
+        @bins (int): 
+        """
+        jobs=[]
+        results = []
+
+        values_list = list(parameters.values()) + list(int(nTrials/bins))
+        values_tuple = tuple(values_list)
+        jobs = [values_tuple]*bins
+
+        for x in range(len(jobs)):
+            jobs[x] = jobs[x] + (x,)
+
+        with Pool(cores) as pool:
+            for x in pool.istarmap(function, jobs):
+                results.append(x)
+
+        acclist = [results[x][1] for x in range(len(jobs))]
+        rtlist = [results[x][2] for x in range(len(jobs))]
+        congruencylist = [results[x][3] for x in range(len(jobs))]
+
+        sim_data = pd.DataFrame({'accuracy': [item for sublist in acclist for item in sublist],
+                                'rt': [item for sublist in rtlist for item in sublist],
+                                'congruency': [item for sublist in congruencylist for item in sublist]})
+
+        return sim_data
     
-    @abstractmethod
-    def parallel_simulations():
-        pass
-    
-    def fit(data, params, bounds, nTrials=1000, cores=4, bins=100, run=1):
+
+    def fit(self, data, params, nTrials=1000, cores=4, bins=100, run=1):
+        """
+        Fits the data according to the model. 
+        @data (): 
+        @params (dict): contains a dictionary of parameters 
+        @nTrials (int): number of trials to try to fit data 
+        @cores (int): number of cores 
+        @bins (int): number of bins 
+        @run (int): counter for what run number the 
+        """
         quantiles_caf = [0.25, 0.5, 0.75]
         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-        props = proportions(data, quantiles_cdf, quantiles_caf)
+        props = self.proportions(data, quantiles_cdf, quantiles_caf)
         if run != 1:
-            fit = minimize(model_function, x0=params, args=(props, nTrials, cores, bins), options={'maxiter': 100},
+            fit = self.minimize(self.model_function, x0=params, args=(props, nTrials, cores, bins), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
-            fit = differential_evolution(model_function, bounds=bounds, 
+            fit = self.differential_evolution(self.model_function, bounds=self.bounds, 
                                     args=(props, nTrials, cores, bins), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
     
-    def model_function(x, props, nTrials, cores, bins, param_number, final=False):
+    def model_function(self, x, props, nTrials, cores, bins, final=False):
+        """
+        Runs the model function. 
+
+        @x:
+        @prop:
+        @nTrials: number of trials
+        @cores: number of cores 
+        @bins: number of bins 
+        @final:
+        """
         # print(x)
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
         if min(x) < 0:
             return sys.maxsize
-        predictions = model_predict(x, nTrials, props, cores, bins, model)
+        predictions = self.model_predict(x, nTrials, props, cores, bins, model)
         empirical_proportions = [props['cdf_props_congruent'], props['cdf_props_incongruent'],
                                 props['caf_props_congruent'], props['caf_props_incongruent']]
         model_proportions = [predictions['cdf_props_congruent'], predictions['cdf_props_incongruent'],
@@ -92,7 +176,7 @@ class Model (ABC):
             # refactor so not limited to these 3 models --> have free param for # of model params
             for i, j in enumerate(empirical_proportions):
                 finalsum += 250 * j * np.log(model_proportions[i])
-            return -2 * finalsum + param_number * np.log(250)
+            return -2 * finalsum + self.param_number * np.log(250)
         for i, j in enumerate(empirical_proportions):
             chisquare += 250 * j * np.log(j / model_proportions[i])
         chisquare = chisquare * 2
@@ -107,23 +191,50 @@ class Model (ABC):
         else:
             return chisquare
     
-    def sdfunc(x, sd_0, sd_r):
-        sd = sd = sd_0 - (sd_r * (x))
-        sd = np.where(sd < 0.001, 0.001, sd)
-        s_ta = norm(0, sd).cdf(.5) - norm(0, sd).cdf(-.5)
-        return s_ta
+    # make parameters a dictionary and loop over keys 
+    def parallel_simulations(self, function, parameters, nTrials=5000, cores=4, bins=4):
+        """
+        Runs parallel simulations for a specific model. 
 
-    def fastmult(x, list2):
-        return x * list2
+        @function (str): function being run for a specific model 
+        @parameters (dict): all of the variables necessary for a particular model in dictionary form (name of variable is key, value of variable is value)
+        @nTrials: number of trials 
+        @cores: number of cores 
+        @bins: number of bins 
+        """
+        jobs=[]
+        results = []
 
-    def fastsub(x, list2):
-        return x - list2
+        param_list = list(parameters.values()) + list(int(nTrials/bins))
+        param_tuple = tuple(param_list)
+        jobs.append(param_tuple * bins)
+        jobs = jobs*bins
+        
+        for x in range(len(jobs)):
+            jobs[x] = jobs[x] + (x,)
 
-    def fastadd(x, list2):
-        return x + list2
+        with Pool(cores) as pool:
+            # appends for each list, unpacking results into lists 
+            for x in pool.istarmap(function, jobs):
+                results.append(x)
 
-    def proportions(data, cdfs, cafs):
-        props = cdf_binsize(cdfs)
+        acclist = [results[x][1] for x in range(len(jobs))]
+        rtlist = [results[x][2] for x in range(len(jobs))]
+        congruencylist = [results[x][3] for x in range(len(jobs))]
+
+        sim_data = pd.DataFrame({'accuracy': [item for sublist in acclist for item in sublist],
+                                'rt': [item for sublist in rtlist for item in sublist],
+                                'congruency': [item for sublist in congruencylist for item in sublist]})
+
+        return sim_data
+
+    def proportions(self, data, cdfs, cafs):
+        """
+        @data: 
+        @cdfs: 
+        @cafs: 
+        """
+        props = self.cdf_binsize(cdfs)
         data_congruent = data[data['congruency']=='congruent']
         data_incongruent = data[data['congruency']=='incongruent']
 
@@ -140,7 +251,11 @@ class Model (ABC):
                 'caf_congruent_acc': list(caf_congruent['acc']), 'caf_incongruent_rt': list(caf_incongruent['rt']),
                 'caf_incongruent_acc': list(caf_incongruent['acc'])}
 
-    def cdf_binsize(cdfs):
+    def cdf_binsize(self, cdfs):
+        """
+
+        @cdfs: 
+        """
         proportionslist = []
         for i, c in enumerate(cdfs):
             if i == 0:
@@ -150,7 +265,12 @@ class Model (ABC):
         proportionslist.append(1 - c)
         return proportionslist
 
-    def cdf_caf_proportions(data, cdfs, cafs):
+    def cdf_caf_proportions(self, data, cdfs, cafs):
+        """
+        @data: 
+        @cdfs:
+        @cafs:
+        """
         subs = data['id'].unique()
         caf_propslist = []
         cdf_propslist = []
@@ -172,7 +292,12 @@ class Model (ABC):
             caf_propslist[j].append(len(temp[temp['accuracy']==0])/len(temp_s))
         return list(pd.DataFrame(cdf_propslist).mean()), list(pd.DataFrame(caf_propslist).mean())
 
-    def caf_cdf(data, quantiles_cdf, quantiles_caf):
+    def caf_cdf(self, data, quantiles_cdf, quantiles_caf):
+        """
+        @data: 
+        @quantiles_cdf: 
+        @quantiles_caf: 
+        """
         subs = data['id'].unique()
         meanrtlist = []
         acclist = []
@@ -211,14 +336,19 @@ class Model (ABC):
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
-    def model_predict(params, nTrials, props, cores, bins, model='dstp', dt=0.001, var=0.1):
+    def model_predict(self, params, nTrials, props, cores, bins, dt=0.001, var=0.1):
+        """
+        Predicts using the behavioral model. 
+        @params: 
+        @nTrials:
+        @props:
+        @cores (int):
+        @bins (int):
+        @dt (float): change in time
+        @var (float): variance
+        """
         np.random.seed(100)
-        if model == 'dstp':
-            sim_data = parallel_sim_dstp(dstp_sim, params, nTrials, cores, bins)
-        elif model == 'ssp':
-            sim_data = parallel_sim(ssp_sim_new, params, nTrials, cores, bins)
-        elif model == 'dmc':
-            sim_data = parallel_sim_dmc(dmc_sim, params, nTrials, cores, bins)
+        sim_data = self.parallel_sim(self.model_simulation, params, nTrials, cores, bins)
 
         sim_data_congruent = sim_data[sim_data['congruency']=='congruent']
         sim_data_incongruent = sim_data[sim_data['congruency']=='incongruent']
@@ -229,7 +359,13 @@ class Model (ABC):
                     'cdf_props_incongruent': cdfs_incongruent, 'caf_props_incongruent': cafs_incongruent}
         return modelprops
 
-    def model_cdf_caf_proportions(data, cdfs, cafcutoffs):
+    def model_cdf_caf_proportions(self, data, cdfs, cafcutoffs):
+        """
+
+        @data: 
+        @cdfs:
+        @cafcutoffs: 
+        """
         temp_acc = data[data['accuracy']==1]
         props_cdf = []
         props_caf = []
@@ -258,32 +394,32 @@ class Model (ABC):
             props_caf.append(0)
         return props_cdf, props_caf
 
-mydata = data
-# s = 24
-mynTrials = 1600
-mycores = 16
-mybins = 16
-# pars = [1, .5, .4, 1.5, .04, .3] #ssp
-# pars = [1, .5, .4, 1, .5, .05, .05, 1.5, .3] #dstp
-pars = [.5, .5, .5, .5, .5, .5, .5]
-for s in range(36, 110):
-    with open('output_dmc_%s.txt' % s, 'w') as output:
-        print('Model fitting ID %s' % s)
-        fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
-        runint=1
-        while fitstat != fitstat2:
-            print('run %s' % runint)
-            fitstat2 = fitstat
-            pars, fitstat = dmc_fit(mydata[mydata['id']==s], np.array(pars), mynTrials, mycores, mybins, run=runint)
-            print(", ".join(str(x) for x in pars))
-            print(" X^2 = %s" % fitstat)
-            runint += 1
-        quantiles_caf = [0.25, 0.5, 0.75]
-        quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-        myprops = proportions(mydata[mydata['id']==s], quantiles_cdf, quantiles_caf)
-        bic = model_function(pars, myprops, mynTrials, mycores, mybins, 'dmc', final=True)
-        output.write(", ".join(str(x) for x in pars))
-        output.write(" X^2 = %s" % fitstat)
-        output.write(" bic = %s" % bic)
+# mydata = data
+# # s = 24
+# mynTrials = 1600
+# mycores = 16
+# mybins = 16
+# # pars = [1, .5, .4, 1.5, .04, .3] #ssp
+# # pars = [1, .5, .4, 1, .5, .05, .05, 1.5, .3] #dstp
+# pars = [.5, .5, .5, .5, .5, .5, .5]
+# for s in range(36, 110):
+#     with open('output_dmc_%s.txt' % s, 'w') as output:
+#         print('Model fitting ID %s' % s)
+#         fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
+#         runint=1
+#         while fitstat != fitstat2:
+#             print('run %s' % runint)
+#             fitstat2 = fitstat
+#             pars, fitstat = dmc_fit(mydata[mydata['id']==s], np.array(pars), mynTrials, mycores, mybins, run=runint)
+#             print(", ".join(str(x) for x in pars))
+#             print(" X^2 = %s" % fitstat)
+#             runint += 1
+#         quantiles_caf = [0.25, 0.5, 0.75]
+#         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
+#         myprops = proportions(mydata[mydata['id']==s], quantiles_cdf, quantiles_caf)
+#         bic = model_function(pars, myprops, mynTrials, mycores, mybins, 'dmc', final=True)
+#         output.write(", ".join(str(x) for x in pars))
+#         output.write(" X^2 = %s" % fitstat)
+#         output.write(" bic = %s" % bic)
 
         
