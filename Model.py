@@ -27,6 +27,7 @@ class Model:
     def istarmap(self, func, iterable, chunksize=1):
         """
         Runs a specific function using a set of arguments. Uses them across different threads. Is the starmap-version of imap.
+        
         @func: the function being applied to the arguments 
         @iterable: the arguments **question
         @chunksize: the number of arguments to pass to the function on each thread **question
@@ -52,6 +53,7 @@ class Model:
     def model_simulation(self, parameters, dt, var, nTrials):
         """
         Base code for a model simulation. 
+
         @parameters (dict): contains a dictionary of variables to their associated values  
         @dt (float): time difference
         @var (float): variance 
@@ -147,10 +149,10 @@ class Model:
 
         @x:
         @prop:
-        @nTrials: number of trials
-        @cores: number of cores 
-        @bins: number of bins 
-        @final:
+        @nTrials (int): number of trials
+        @cores (int): number of cores 
+        @bins (int): number of bins 
+        @final (bool): if this is the final trial or not  
         """
         # print(x)
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
@@ -198,9 +200,9 @@ class Model:
 
         @function (str): function being run for a specific model 
         @parameters (dict): all of the variables necessary for a particular model in dictionary form (name of variable is key, value of variable is value)
-        @nTrials: number of trials 
-        @cores: number of cores 
-        @bins: number of bins 
+        @nTrials (int): number of trials 
+        @cores (int): number of cores 
+        @bins (int): number of bins 
         """
         jobs=[]
         results = []
@@ -339,8 +341,8 @@ class Model:
     def model_predict(self, params, nTrials, props, cores, bins, dt=0.001, var=0.1):
         """
         Predicts using the behavioral model. 
-        @params: 
-        @nTrials:
+        @params (dict): 
+        @nTrials (int):
         @props:
         @cores (int):
         @bins (int):
