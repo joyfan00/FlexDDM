@@ -1,5 +1,6 @@
 # packages 
 from Model import Model
+from variables import Variables
 from file_input import *
 # import pandas as pd
 import numpy as np
@@ -14,13 +15,15 @@ class SSP (Model):
     # different file that processes the flanker data 
     # create documentation for what the csv, pkl, or json should look like before inputting 
     param_number = 6
+    global bounds
     
     def __init__(self):
         """
         Initializes a DSTP model object. 
         """
         data = getRTData()
-        super().__init__(self.param_number, [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(data['rt']))])
+        self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(data['rt']))]
+        super().__init__(self.param_number, self.bounds)
     
     def model_simulation(self, parameters, dt=0.001, var=0.1, nTrials=1000, noiseseed=50):
         """

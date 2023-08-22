@@ -5,6 +5,7 @@ import random
 import math
 from Model import Model
 from file_input import *
+from variables import Variables
 import pandas as pd
 
 """

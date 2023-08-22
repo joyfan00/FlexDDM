@@ -4,6 +4,7 @@ import random
 import pandas as pd
 from file_input import *
 from Model import Model
+from variables import Variables
 
 """
 This class is a specific DSTP model class. 

@@ -45,7 +45,7 @@ for s in range(36, 110):
         while fitstat != fitstat2:
             print('run %s' % runint)
             fitstat2 = fitstat
-            pars, fitstat = shrinking_spotlight.fit(mydata[mydata['id']==s], np.array(pars), mynTrials, mycores, mybins, run=runint)
+            pars, fitstat = shrinking_spotlight.fit(mydata[mydata['id']==s], pars, mynTrials, mycores, mybins, run=runint)
             print(", ".join(str(x) for x in pars))
             print(" X^2 = %s" % fitstat)
             runint += 1

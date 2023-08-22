@@ -1,9 +1,28 @@
 # packages 
-import pandas as pd
+# import pandas as pd
 import numpy as np
 import random
 import sys
 import math
+
+from multiprocessing.pool import Pool
+from variables import Variables
+# import tqdm
+from scipy.optimize import minimize
+from scipy.optimize import differential_evolution, shgo
+import numpy as np
+import pandas as pd
+import math
+import seaborn as sns
+import matplotlib.pyplot as plt
+import json
+import multiprocessing.pool as mpp
+from scipy.stats import norm
+import random
+from operator import add, sub, mul
+import sys
+import warnings
+warnings.filterwarnings("ignore")
 
 """
 This class is a parent class that provides the structure of what functions 
@@ -14,6 +33,8 @@ class Model:
 
     global param_number
     global bounds
+    global cdfs 
+    global cafs
 
     def __init__(self, param_number, bounds):
         """
@@ -27,10 +48,10 @@ class Model:
     def istarmap(self, func, iterable, chunksize=1):
         """
         Runs a specific function using a set of arguments. Uses them across different threads. Is the starmap-version of imap.
-        
+
         @func: the function being applied to the arguments 
-        @iterable: the arguments **question
-        @chunksize: the number of arguments to pass to the function on each thread **question
+        @iterable: the arguments for the function 
+        @chunksize: 
         """
 
         self._check_running()
@@ -57,7 +78,7 @@ class Model:
         @parameters (dict): contains a dictionary of variables to their associated values  
         @dt (float): time difference
         @var (float): variance 
-        @nTrials (float): number of trials running simulations on
+        @nTrials (int): number of trials running simulations on
         """
         # define variables 
         alpha = parameters['alpha']
@@ -97,6 +118,7 @@ class Model:
         jobs=[]
         results = []
 
+        # how many trials in that job 
         values_list = list(parameters.values()) + list(int(nTrials/bins))
         values_tuple = tuple(values_list)
         jobs = [values_tuple]*bins
@@ -104,6 +126,7 @@ class Model:
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (x,)
 
+        # Pool is the number of threads 
         with Pool(cores) as pool:
             for x in pool.istarmap(function, jobs):
                 results.append(x)
@@ -122,21 +145,20 @@ class Model:
     def fit(self, data, params, nTrials=1000, cores=4, bins=100, run=1):
         """
         Fits the data according to the model. 
+
         @data (): 
         @params (dict): contains a dictionary of parameters 
         @nTrials (int): number of trials to try to fit data 
         @cores (int): number of cores 
         @bins (int): number of bins 
-        @run (int): counter for what run number the 
+        @run (int): counter for what run number 
         """
-        quantiles_caf = [0.25, 0.5, 0.75]
-        quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-        props = self.proportions(data, quantiles_cdf, quantiles_caf)
+        props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
         if run != 1:
-            fit = self.minimize(self.model_function, x0=params, args=(props, nTrials, cores, bins), options={'maxiter': 100},
+            fit = minimize(self.model_function, x0=params, args=(props, nTrials, cores, bins), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
-            fit = self.differential_evolution(self.model_function, bounds=self.bounds, 
+            fit = differential_evolution(self.model_function, bounds=self.bounds, 
                                     args=(props, nTrials, cores, bins), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
         bestparams = fit.x
@@ -147,8 +169,8 @@ class Model:
         """
         Runs the model function. 
 
-        @x:
-        @prop:
+        @x (): 
+        @prop (): 
         @nTrials (int): number of trials
         @cores (int): number of cores 
         @bins (int): number of bins 
@@ -158,7 +180,13 @@ class Model:
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
         if min(x) < 0:
             return sys.maxsize
-        predictions = self.model_predict(x, nTrials, props, cores, bins, model)
+        # proportions: breaking them down into different buckets 
+        predictions = self.model_predict(x, nTrials, props, cores, bins)
+        # cdf_props_congruent:
+        # what percent of RTs fall within those buckets
+        # cdf_props_congruents: list of percentages that fall within quantiles, percentage of RTs that are congruent
+        # compare to the data simulated 
+        # keep adjusting until get to those percentages within quantiles with the simulated data 
         empirical_proportions = [props['cdf_props_congruent'], props['cdf_props_incongruent'],
                                 props['caf_props_congruent'], props['caf_props_incongruent']]
         model_proportions = [predictions['cdf_props_congruent'], predictions['cdf_props_incongruent'],
@@ -194,7 +222,7 @@ class Model:
             return chisquare
     
     # make parameters a dictionary and loop over keys 
-    def parallel_simulations(self, function, parameters, nTrials=5000, cores=4, bins=4):
+    def parallel_sim(self, function, parameters, nTrials=5000, cores=4, bins=4):
         """
         Runs parallel simulations for a specific model. 
 
@@ -230,21 +258,23 @@ class Model:
 
         return sim_data
 
-    def proportions(self, data, cdfs, cafs):
+    def proportions(self, data, cdfs=[0.1, 0.3, 0.5, 0.7, 0.9], cafs=[0.25, 0.5, 0.75]):
         """
-        @data: 
-        @cdfs: 
-        @cafs: 
+        Calculate proportion of how percentage of RTs in quantiles. 
+        @data (): simulated data
+        @cdfs (): percentiles used (0.1, 0.3, 0.5, 0.7, 0.9)
+        @cafs (): percentiles used 
         """
         props = self.cdf_binsize(cdfs)
         data_congruent = data[data['congruency']=='congruent']
         data_incongruent = data[data['congruency']=='incongruent']
 
-        cdf_props_congruent, caf_props_congruent = cdf_caf_proportions(data_congruent, props, cafs)
-        cdf_props_incongruent, caf_props_incongruent = cdf_caf_proportions(data_incongruent, props, cafs)
+        cdf_props_congruent, caf_props_congruent = self.cdf_caf_proportions(data_congruent, props, cafs)
+        cdf_props_incongruent, caf_props_incongruent = self.cdf_caf_proportions(data_incongruent, props, cafs)
 
-        caf_congruent, cdf_congruent, caf_cutoff_congruent = caf_cdf(data_congruent, cdfs, cafs)
-        caf_incongruent, cdf_incongruent, caf_cutoff_incongruent = caf_cdf(data_incongruent, cdfs, cafs)
+        caf_congruent, cdf_congruent, caf_cutoff_congruent = self.caf_cdf(data_congruent)
+        caf_incongruent, cdf_incongruent, caf_cutoff_incongruent = self.caf_cdf(data_incongruent)
+        # add the word cutoff to cdf_congruent and cdf_incongruent (so cdf_cutoff_congruent and cdf_cutoff_incongruent)
         return {'cdfs': cdfs, 'cafs': cafs, 'cdf_props_congruent': cdf_props_congruent,
                 'cdf_props_incongruent': cdf_props_incongruent, 'caf_props_congruent': caf_props_congruent,
                 'caf_props_incongruent': caf_props_incongruent, 'cdf_congruent': cdf_congruent,
@@ -253,10 +283,11 @@ class Model:
                 'caf_congruent_acc': list(caf_congruent['acc']), 'caf_incongruent_rt': list(caf_incongruent['rt']),
                 'caf_incongruent_acc': list(caf_incongruent['acc'])}
 
-    def cdf_binsize(self, cdfs):
+    def cdf_binsize(self, cdfs=[0.1, 0.3, 0.5, 0.7, 0.9]):
         """
-
-        @cdfs: 
+        Calculates the distance between each of the cdfs. 
+        ex. [0.1, 0.3, 0.5, 0.7, 0.9] would result in [0.1, 0.2, 0.2, 0.2, 0.2, 0.1]
+        @cdfs (list of floats): list of percentiles 
         """
         proportionslist = []
         for i, c in enumerate(cdfs):
@@ -267,11 +298,11 @@ class Model:
         proportionslist.append(1 - c)
         return proportionslist
 
-    def cdf_caf_proportions(self, data, cdfs, cafs):
+    def cdf_caf_proportions(self, data, cdfs=[0.1, 0.3, 0.5, 0.7, 0.9], cafs=[0.25, 0.50, 0.75]):
         """
-        @data: 
-        @cdfs:
-        @cafs:
+        @data (): 
+        @cdfs ():
+        @cafs ():
         """
         subs = data['id'].unique()
         caf_propslist = []
@@ -294,11 +325,9 @@ class Model:
             caf_propslist[j].append(len(temp[temp['accuracy']==0])/len(temp_s))
         return list(pd.DataFrame(cdf_propslist).mean()), list(pd.DataFrame(caf_propslist).mean())
 
-    def caf_cdf(self, data, quantiles_cdf, quantiles_caf):
+    def caf_cdf(self, data):
         """
         @data: 
-        @quantiles_cdf: 
-        @quantiles_caf: 
         """
         subs = data['id'].unique()
         meanrtlist = []
@@ -307,12 +336,13 @@ class Model:
         cdfslist = []
         cafcutofflist = []
 
+        # enumerate keeps track of the index and element 
         for k, s in enumerate(subs):
             temp = data[data['id']==s]
-            cafs = np.quantile(temp['rt'], quantiles_caf)
-            cdfslist.append(np.quantile(temp[temp['accuracy']==1]['rt'], quantiles_cdf))
-            cafcutofflist.append(np.quantile(temp['rt'], quantiles_caf))
-            for i, q in enumerate(quantiles_caf):
+            cafs = np.quantile(temp['rt'], Variables.QUANTILES_CAF)
+            cdfslist.append(np.quantile(temp[temp['accuracy']==1]['rt'], Variables.QUANTILES_CDF))
+            cafcutofflist.append(np.quantile(temp['rt'], Variables.QUANTILES_CAF))
+            for i, q in enumerate(Variables.QUANTILES_CAF):
                 if i == 0:
                     temp_q = temp[temp['rt'] <= cafs[i]]
                     meanrtlist.append([np.mean(temp_q['rt'])])
@@ -329,7 +359,8 @@ class Model:
             # errorproplist[k].append(len(temp_q[temp_q['accuracy']==0]) / len(temp_q))
             # for i, q in enumerate(quantiles_cdf):
             #     if i == 0:
-
+        
+        # takes the mean out of all of those columns 
         group_rt = list(pd.DataFrame(meanrtlist).mean())
         group_accuracy = list(pd.DataFrame(acclist).mean())
         # group_errorprop = list(pd.DataFrame(errorproplist).mean())
@@ -343,19 +374,19 @@ class Model:
         Predicts using the behavioral model. 
         @params (dict): 
         @nTrials (int):
-        @props:
+        @props ():
         @cores (int):
         @bins (int):
         @dt (float): change in time
         @var (float): variance
         """
         np.random.seed(100)
-        sim_data = self.parallel_sim(self.model_simulation, params, nTrials, cores, bins)
+        sim_data = self.parallel_sim('model_simulation', params, nTrials, cores, bins)
 
         sim_data_congruent = sim_data[sim_data['congruency']=='congruent']
         sim_data_incongruent = sim_data[sim_data['congruency']=='incongruent']
-        cdfs_congruent, cafs_congruent = model_cdf_caf_proportions(sim_data_congruent, props['cdf_congruent'], props['caf_cutoff_congruent'])
-        cdfs_incongruent, cafs_incongruent = model_cdf_caf_proportions(sim_data_incongruent, props['cdf_incongruent'], props['caf_cutoff_incongruent'])
+        cdfs_congruent, cafs_congruent = self.model_cdf_caf_proportions(sim_data_congruent, props['cdf_congruent'], props['caf_cutoff_congruent'])
+        cdfs_incongruent, cafs_incongruent = self.model_cdf_caf_proportions(sim_data_incongruent, props['cdf_incongruent'], props['caf_cutoff_incongruent'])
 
         modelprops = {'cdf_props_congruent': cdfs_congruent, 'caf_props_congruent': cafs_congruent,
                     'cdf_props_incongruent': cdfs_incongruent, 'caf_props_incongruent': cafs_incongruent}
@@ -364,9 +395,9 @@ class Model:
     def model_cdf_caf_proportions(self, data, cdfs, cafcutoffs):
         """
 
-        @data: 
-        @cdfs:
-        @cafcutoffs: 
+        @data (): simulated data
+        @cdfs (list of floats): accurate percentiles
+        @cafcutoffs (list of floats): inaccurate percentiles 
         """
         temp_acc = data[data['accuracy']==1]
         props_cdf = []
@@ -396,32 +427,6 @@ class Model:
             props_caf.append(0)
         return props_cdf, props_caf
 
-# mydata = data
-# # s = 24
-# mynTrials = 1600
-# mycores = 16
-# mybins = 16
-# # pars = [1, .5, .4, 1.5, .04, .3] #ssp
-# # pars = [1, .5, .4, 1, .5, .05, .05, 1.5, .3] #dstp
-# pars = [.5, .5, .5, .5, .5, .5, .5]
-# for s in range(36, 110):
-#     with open('output_dmc_%s.txt' % s, 'w') as output:
-#         print('Model fitting ID %s' % s)
-#         fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
-#         runint=1
-#         while fitstat != fitstat2:
-#             print('run %s' % runint)
-#             fitstat2 = fitstat
-#             pars, fitstat = dmc_fit(mydata[mydata['id']==s], np.array(pars), mynTrials, mycores, mybins, run=runint)
-#             print(", ".join(str(x) for x in pars))
-#             print(" X^2 = %s" % fitstat)
-#             runint += 1
-#         quantiles_caf = [0.25, 0.5, 0.75]
-#         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-#         myprops = proportions(mydata[mydata['id']==s], quantiles_cdf, quantiles_caf)
-#         bic = model_function(pars, myprops, mynTrials, mycores, mybins, 'dmc', final=True)
-#         output.write(", ".join(str(x) for x in pars))
-#         output.write(" X^2 = %s" % fitstat)
-#         output.write(" bic = %s" % bic)
+
 
         
