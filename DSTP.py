@@ -1,6 +1,8 @@
-import pandas as pd
+# import pandas as pd
 import numpy as np
 import random
+import pandas as pd
+from file_input import *
 from Model import Model
 
 """
@@ -11,12 +13,14 @@ class DSTP(Model):
 
     data = pd.DataFrame()
     param_number = 9
-    bounds = [(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,2),(0,min(data['rt']))]
+    global bounds
     
     def __init__(self):
         """
         Initializes a DSTP model object. 
         """
+        data = getRTData()
+        self.bounds = [(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,2),(0,min(data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
     def model_simulation(self, parameters, dt, var, nTrials, noiseseed):

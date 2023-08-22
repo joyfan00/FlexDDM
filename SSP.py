@@ -1,6 +1,7 @@
 # packages 
 from Model import Model
-import pandas as pd
+from file_input import *
+# import pandas as pd
 import numpy as np
 import math
 import random
@@ -10,17 +11,18 @@ This class is a specific DSTP model class.
 """
 
 class SSP (Model):
-    data = pd.DataFrame();
+    # different file that processes the flanker data 
+    # create documentation for what the csv, pkl, or json should look like before inputting 
     param_number = 6
-    bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(data['rt']))]
     
     def __init__(self):
         """
         Initializes a DSTP model object. 
         """
-        super().__init__(self.param_number, self.bounds)
+        data = getRTData()
+        super().__init__(self.param_number, [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(data['rt']))])
     
-    def model_simulation(self, parameters, dt, var, nTrials, noiseseed):
+    def model_simulation(self, parameters, dt=0.001, var=0.1, nTrials=1000, noiseseed=50):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -42,12 +44,13 @@ class SSP (Model):
         sd_r = parameters['sd_r']
         tau = parameters['tau']
 
+        # 
         scale = 10000
         choicelist = []
         rtlist = []
         congruencylist = ['congruent']*int(nTrials/2) + ['incongruent']*int(nTrials/2) 
         np.random.seed(noiseseed)
-        noise = np.random.normal(loc=0, scale=.01, size=scale)
+        noise = np.random.normal(loc=0, scale=var, size=scale)
         tlist = np.array(np.arange(0, dt*scale, dt))
         s_ta = np.apply_along_axis(lambda x: self.sdfunc(x, sd_0, sd_r), 0, tlist)
         s_fl = np.apply_along_axis(lambda x: self.fastsub(x, s_ta), 0, [1]*scale)
