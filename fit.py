@@ -7,6 +7,8 @@ import sys
 import json
 import pandas as pd
 import numpy as np
+from variables import Variables
+from file_input import *
 
 # convert to jupyter notebook 
 shrinking_spotlight = SSP()
@@ -15,10 +17,12 @@ shrinking_spotlight = SSP()
 # needs to be run before istarmap function 
 mpp.Pool.istarmap = Model.istarmap
 
-data = json.load(open('flanker.json'))
-data = pd.DataFrame({'id': data['N_ind'], 'congruency': data['condition'],'rt': [x/1000 for x in data['RT']], 'accuracy': [x-1 for x in data['choice']]})
-data['congruency'] = ['congruent' if x == 1 else 'incongruent' for x in data['congruency']]
-mydata = data
+# mydata = getRTData()
+# print(data)
+# data = pd.DataFrame({'id': data['N_ind'], 'congruency': data['condition'],'rt': [x/1000 for x in data['RT']], 'accuracy': [x-1 for x in data['choice']]})
+# data['congruency'] = ['congruent' if x == 1 else 'incongruent' for x in data['congruency']]
+# mydata = data
+
 # s = 24
 mynTrials = 1600
 mycores = 16
@@ -45,14 +49,14 @@ for s in range(36, 110):
         while fitstat != fitstat2:
             print('run %s' % runint)
             fitstat2 = fitstat
-            pars, fitstat = shrinking_spotlight.fit(mydata[mydata['id']==s], pars, mynTrials, mycores, mybins, run=runint)
+            pars, fitstat = shrinking_spotlight.fit(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], pars, mynTrials, mycores, mybins, run=runint)
             print(", ".join(str(x) for x in pars))
             print(" X^2 = %s" % fitstat)
             runint += 1
         # make quantiles caf and cdf changeable 
         quantiles_caf = [0.25, 0.5, 0.75]
         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-        myprops = shrinking_spotlight.proportions(mydata[mydata['id']==s], quantiles_cdf, quantiles_caf)
+        myprops = shrinking_spotlight.proportions(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], quantiles_cdf, quantiles_caf)
         bic = shrinking_spotlight.model_function(pars, myprops, mynTrials, mycores, mybins, final=True)
         output.write(", ".join(str(x) for x in pars))
         output.write(" X^2 = %s" % fitstat)

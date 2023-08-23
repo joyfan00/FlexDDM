@@ -16,13 +16,14 @@ class SSP (Model):
     # create documentation for what the csv, pkl, or json should look like before inputting 
     param_number = 6
     global bounds
+    global data
     
     def __init__(self):
         """
         Initializes a DSTP model object. 
         """
-        data = getRTData()
-        self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(data['rt']))]
+        self.data = getRTData()
+        self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
     
     def model_simulation(self, parameters, dt=0.001, var=0.1, nTrials=1000, noiseseed=50):
