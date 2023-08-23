@@ -24,9 +24,9 @@ mpp.Pool.istarmap = Model.istarmap
 # mydata = data
 
 # s = 24
-mynTrials = 1600
-mycores = 16
-mybins = 16
+mynTrials = 1
+mycores = 4
+mybins = 4
 
 ## GOOD OUTPUT 
 ## excel file with fit function with chi squared, bic (shows fit), parameter values, get it to make a csv

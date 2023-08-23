@@ -117,6 +117,7 @@ class Model:
         """
         jobs=[]
         results = []
+        print(type(parameters))
 
         # how many trials in that job 
         values_list = list(parameters.values()) + list(int(nTrials/bins))
@@ -235,7 +236,10 @@ class Model:
         jobs=[]
         results = []
 
-        param_list = list(parameters.values()) + list(int(nTrials/bins))
+        # param_list = list(parameters.values()) + list(int(nTrials/bins))
+ 
+        param_list = list(parameters) 
+        param_list.append(int(nTrials/bins))
         param_tuple = tuple(param_list)
         jobs.append(param_tuple * bins)
         jobs = jobs*bins
