@@ -119,11 +119,15 @@ class Model:
         results = []
         print(type(parameters))
 
-        # how many trials in that job 
+        # Create a list that contains all of the parameter values (input params + how many trials should go in each bin)
+        # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
         values_list = list(parameters.values()) + list(int(nTrials/bins))
+        # Turn the params list into a tuple
         values_tuple = tuple(values_list)
+        # Create a list of tuples (one tuple per bin)
         jobs = [values_tuple]*bins
 
+        # Label each tuple with its index #
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (x,)
 
@@ -385,7 +389,7 @@ class Model:
         @var (float): variance
         """
         np.random.seed(100)
-        sim_data = self.parallel_sim('model_simulation', params, nTrials, cores, bins)
+        sim_data = self.parallel_sim(self.model_simulation, params, nTrials, cores, bins)
 
         sim_data_congruent = sim_data[sim_data['congruency']=='congruent']
         sim_data_incongruent = sim_data[sim_data['congruency']=='incongruent']
