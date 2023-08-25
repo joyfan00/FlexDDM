@@ -71,41 +71,41 @@ class Model:
             ))
         return (item for chunk in result for item in chunk)
 
-    def model_simulation(self, parameters, dt, var, nTrials):
-        """
-        Base code for a model simulation. 
+    # def model_simulation(self, parameters, dt, var, nTrials):
+    #     """
+    #     Base code for a model simulation. 
 
-        @parameters (dict): contains a dictionary of variables to their associated values  
-        @dt (float): time difference
-        @var (float): variance 
-        @nTrials (int): number of trials running simulations on
-        """
-        # define variables 
-        alpha = parameters['alpha']
-        delta = parameters['delta']
-        tau = parameters['tau']
-        beta = parameters['beta']
+    #     @parameters (dict): contains a dictionary of variables to their associated values  
+    #     @dt (float): time difference
+    #     @var (float): variance 
+    #     @nTrials (int): number of trials running simulations on
+    #     """
+    #     # define variables 
+    #     alpha = parameters['alpha']
+    #     delta = parameters['delta']
+    #     tau = parameters['tau']
+    #     beta = parameters['beta']
 
-        choicelist = []
-        rtlist = []
-        #sample a bunch of possible updates to evidence with each unit of time dt. Updates are centered
-        #around drift rate delta (scaled to the units of time), with variance var (because updates are noisy)
-        updates = np.random.normal(loc=delta*dt, scale=var, size=10000) 
-        congruencylist = ['congruent']*int(nTrials/2) + ['incongruent']*int(nTrials/2) 
-        for n in range(0, nTrials):
-            t = tau # start the accumulation process at non-decision time tau
-            evidence = beta # start our evidence at initial-bias beta
-            while evidence < alpha and evidence > -alpha: # keep accumulating evidence until you reach a threshold
-                evidence += random.choice(updates) # add one of the many possible updates to evidence
-                t += dt # increment time by the unit dt
-            if evidence > alpha:
-                choicelist.append(1) # choose the upper threshold action
-            else:
-                choicelist.append(0) # choose the lower threshold action
-            rtlist.append(t)
-        return (range(1, nTrials+1), choicelist, rtlist, congruencylist)
+    #     choicelist = []
+    #     rtlist = []
+    #     #sample a bunch of possible updates to evidence with each unit of time dt. Updates are centered
+    #     #around drift rate delta (scaled to the units of time), with variance var (because updates are noisy)
+    #     updates = np.random.normal(loc=delta*dt, scale=var, size=10000) 
+    #     congruencylist = ['congruent']*int(nTrials/2) + ['incongruent']*int(nTrials/2) 
+    #     for n in range(0, nTrials):
+    #         t = tau # start the accumulation process at non-decision time tau
+    #         evidence = beta # start our evidence at initial-bias beta
+    #         while evidence < alpha and evidence > -alpha: # keep accumulating evidence until you reach a threshold
+    #             evidence += random.choice(updates) # add one of the many possible updates to evidence
+    #             t += dt # increment time by the unit dt
+    #         if evidence > alpha:
+    #             choicelist.append(1) # choose the upper threshold action
+    #         else:
+    #             choicelist.append(0) # choose the lower threshold action
+    #         rtlist.append(t)
+    #     return (range(1, nTrials+1), choicelist, rtlist, congruencylist)
 
-    def parallel_sim(self, function, parameters, nTrials=5000, cores=4, bins=4):
+    def parallel_sim(self, function, parameters, dt, var, noiseseed, nTrials=5000, cores=4, bins=4):
         """
         Runs a parallel simulation on a set of parameters given a specific function. 
 
@@ -121,10 +121,28 @@ class Model:
 
         # Create a list that contains all of the parameter values (input params + how many trials should go in each bin)
         # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
-        values_list = list(parameters.values()) + list(int(nTrials/bins))
+        values_list = [parameters]
+        
+        values_list.append(dt)
+        values_list.append(var)
+        values_list.append(noiseseed)
+        values_list.append(int(nTrials/bins))
+
+        print(values_list)
+        
+        ## preferably have dt, var, etc be defined by user in the beginning in the one file they run. only have default values for the fn the user is 
+        # using, not within the methods themselves
+
+        #remove defaults from extending model classes for dt var etc, and add them to tuple here
+
         # Turn the params list into a tuple
         values_tuple = tuple(values_list)
+        print(values_tuple)
         # Create a list of tuples (one tuple per bin)
+
+        ###important:
+        ### if we have self going into model_simulation -- we need to have it as an argument in the jobs tuple -
+            #otherwise istarmap wont work
         jobs = [values_tuple]*bins
 
         # Label each tuple with its index #
@@ -133,6 +151,7 @@ class Model:
 
         # Pool is the number of threads 
         with Pool(cores) as pool:
+
             for x in pool.istarmap(function, jobs):
                 results.append(x)
 
@@ -163,14 +182,22 @@ class Model:
             fit = minimize(self.model_function, x0=params, args=(props, nTrials, cores, bins), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
+            print(props)
             fit = differential_evolution(self.model_function, bounds=self.bounds, 
                                     args=(props, nTrials, cores, bins), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
+                
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
     
     def model_function(self, x, props, nTrials, cores, bins, final=False):
+        ####
+        #### important 
+        ####
+        # cant take self in the start bc diff_evolution and minimize HAVE TO start with x as a parameter. 
+        # original versions of the fns were written with the contraints of diff_ev and minimize in mind
+
         """
         Runs the model function. 
 

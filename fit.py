@@ -25,8 +25,8 @@ mpp.Pool.istarmap = Model.istarmap
 
 # s = 24
 mynTrials = 1
-mycores = 4
-mybins = 4
+mycores = 1
+mybins = 1
 
 ## GOOD OUTPUT 
 ## excel file with fit function with chi squared, bic (shows fit), parameter values, get it to make a csv
@@ -42,6 +42,7 @@ mybins = 4
 #         tau = parameters['tau']
 pars = {'alpha':0.5, 'beta':0.5, 'p':0.5, 'sd_0':0.5, 'sd_r':0.5, 'tau':0.5}
 for s in range(36, 110):
+    print(s)
     with open('output_dmc_%s.txt' % s, 'w') as output:
         print('Model fitting ID %s' % s)
         fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
