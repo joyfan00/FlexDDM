@@ -40,7 +40,7 @@ class SSP (Model):
         if (len(parameters) != self.param_number):
             print('Dictionary input is not correct.')
 
-        # define variables 
+        # define variables f
         alpha = parameters['alpha']
         beta = parameters['beta']
         p = parameters['p']
@@ -52,13 +52,13 @@ class SSP (Model):
         scale = 10000
         choicelist = []
         rtlist = []
-        congruencylist = ['congruent']*int(nTrials/2) + ['incongruent']*int(nTrials/2) 
-        np.random.seed(noiseseed)
+        congruencylist = ['congruent']*int(Variables.NTRIALS/2) + ['incongruent']*int(Variables.NTRIALS/2) 
+        np.random.seed(Variables.NOISESEED)
         noise = np.random.normal(loc=0, scale=var, size=scale)
-        tlist = np.array(np.arange(0, dt*scale, dt))
+        tlist = np.array(np.arange(0, Variables.DT*scale, Variables.DT))
         s_ta = np.apply_along_axis(lambda x: self.sdfunc(x, sd_0, sd_r), 0, tlist)
         s_fl = np.apply_along_axis(lambda x: self.fastsub(x, s_ta), 0, [1]*scale)
-        for n in range(0, nTrials):
+        for n in range(0, Variables.NTRIALS):
             tind = 0
             np.random.shuffle(noise)
             delta_ta = np.apply_along_axis(lambda x: self.fastmult(x, [p]*scale), 0, s_ta)
@@ -67,7 +67,7 @@ class SSP (Model):
                 delta = np.apply_along_axis(lambda x: self.fastsub(x, delta_fl), 0, delta_ta)
             else:
                 delta = np.apply_along_axis(lambda x: self.fastadd(x, delta_fl), 0, delta_ta)
-            changelist = np.apply_along_axis(lambda x: self.fastmult(x, [dt]*scale), 0, delta)
+            changelist = np.apply_along_axis(lambda x: self.fastmult(x, [Variables.DT]*scale), 0, delta)
             evidencelist = list(np.apply_along_axis(lambda x: self.fastadd(x, noise), 0, changelist))
             evidencelist.insert(0, beta*alpha/2 - (1-beta)*alpha/2)
             cumulative_evidence = np.cumsum(evidencelist)
@@ -107,7 +107,7 @@ class SSP (Model):
             t = (min(above, below) + tind)*dt + tau
             rtlist.append(t)
 
-        return (range(1, nTrials+1), choicelist, rtlist, congruencylist)
+        return (range(1, Variables.NTRIALS+1), choicelist, rtlist, congruencylist)
     
     def sdfunc(x, sd_0, sd_r):
         sd = sd = sd_0 - (sd_r * (x))
