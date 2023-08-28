@@ -26,7 +26,7 @@ class SSP (Model):
         self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
     
-    def model_simulation(self, parameters, dt=0.001, var=0.1, nTrials=1000, noiseseed=50):
+    def model_simulation(self, parameters):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -54,7 +54,7 @@ class SSP (Model):
         rtlist = []
         congruencylist = ['congruent']*int(Variables.NTRIALS/2) + ['incongruent']*int(Variables.NTRIALS/2) 
         np.random.seed(Variables.NOISESEED)
-        noise = np.random.normal(loc=0, scale=var, size=scale)
+        noise = np.random.normal(loc=0, scale=Variables.VAR, size=scale)
         tlist = np.array(np.arange(0, Variables.DT*scale, Variables.DT))
         s_ta = np.apply_along_axis(lambda x: self.sdfunc(x, sd_0, sd_r), 0, tlist)
         s_fl = np.apply_along_axis(lambda x: self.fastsub(x, s_ta), 0, [1]*scale)
@@ -77,8 +77,8 @@ class SSP (Model):
                 tind += scale
                 oldevidence = cumulative_evidence[-1]
                 np.random.shuffle(noise)
-                tlist = np.arange(dt*tind, dt*(tind+scale), dt)
-                if (sd_0 - (sd_r * (dt*tind))) <= 0.001:
+                tlist = np.arange(Variables.DT*tind, Variables.DT*(tind+scale), Variables.DT)
+                if (sd_0 - (sd_r * (Variables.DT*tind))) <= 0.001:
                     s_ta = [norm(0, 0.001).cdf(.5) - norm(0, 0.001).cdf(-.5)]*scale
                 else:
                     s_ta = np.apply_along_axis(lambda x: self.sdfunc(x, sd_0, sd_r), 0, tlist)
@@ -89,7 +89,7 @@ class SSP (Model):
                     delta = np.apply_along_axis(lambda x: self.fastsub(x, delta_fl), 0, delta_ta)
                 else:
                     delta = np.apply_along_axis(lambda x: self.fastadd(x, delta_fl), 0, delta_ta)
-                changelist = np.apply_along_axis(lambda x: self.fastmult(x, [dt]*scale), 0, delta)
+                changelist = np.apply_along_axis(lambda x: self.fastmult(x, [Variables.DT]*scale), 0, delta)
                 evidencelist = list(np.apply_along_axis(lambda x: self.fastadd(x, noise), 0, changelist))
                 evidencelist.insert(0, oldevidence)
                 cumulative_evidence = np.cumsum(evidencelist)
@@ -104,7 +104,7 @@ class SSP (Model):
                 choicelist.append(1)
             else:
                 choicelist.append(0)
-            t = (min(above, below) + tind)*dt + tau
+            t = (min(above, below) + tind)*Variables.DT + tau
             rtlist.append(t)
 
         return (range(1, Variables.NTRIALS+1), choicelist, rtlist, congruencylist)
