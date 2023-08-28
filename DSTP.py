@@ -20,11 +20,11 @@ class DSTP(Model):
         """
         Initializes a DSTP model object. 
         """
-        data = getRTData()
+        self.data = getRTData()
         self.bounds = [(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,2),(0,min(data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
-    def model_simulation(self, parameters, dt, var, nTrials, noiseseed):
+    def model_simulation(self, parameters):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DSTP models- 

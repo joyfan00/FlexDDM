@@ -105,7 +105,7 @@ class Model:
     #         rtlist.append(t)
     #     return (range(1, nTrials+1), choicelist, rtlist, congruencylist)
 
-    def parallel_sim(self, function, parameters, dt, var, noiseseed, nTrials=5000, cores=4, bins=4):
+    def parallel_sim(self, function, parameters):
         """
         Runs a parallel simulation on a set of parameters given a specific function. 
 
@@ -123,11 +123,6 @@ class Model:
         # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
         values_list = [parameters]
         
-        values_list.append(dt)
-        values_list.append(var)
-        values_list.append(noiseseed)
-        values_list.append(int(nTrials/bins))
-
         print(values_list)
         
         ## preferably have dt, var, etc be defined by user in the beginning in the one file they run. only have default values for the fn the user is 
@@ -142,15 +137,15 @@ class Model:
 
         ###important:
         ### if we have self going into model_simulation -- we need to have it as an argument in the jobs tuple -
-            #otherwise istarmap wont work
-        jobs = [values_tuple]*bins
+            #otherwise istarmap wont
+        jobs = [values_tuple]*Variables.BINS
 
         # Label each tuple with its index #
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (x,)
 
         # Pool is the number of threads 
-        with Pool(cores) as pool:
+        with Pool(Variables.CORES) as pool:
 
             for x in pool.istarmap(function, jobs):
                 results.append(x)
@@ -166,7 +161,7 @@ class Model:
         return sim_data
     
 
-    def fit(self, data, params, nTrials=1000, cores=4, bins=100, run=1):
+    def fit(self, data, params, run=1):
         """
         Fits the data according to the model. 
 
@@ -179,19 +174,19 @@ class Model:
         """
         props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
         if run != 1:
-            fit = minimize(self.model_function, x0=params, args=(props, nTrials, cores, bins), options={'maxiter': 100},
+            fit = minimize(self.model_function, x0=params, args=(props), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
             print(props)
             fit = differential_evolution(self.model_function, bounds=self.bounds, 
-                                    args=(props, nTrials, cores, bins), maxiter=1, seed=100,
+                                    args=(props), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
                 
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
     
-    def model_function(self, x, props, nTrials, cores, bins, final=False):
+    def model_function(self, x, props, final=False):
         ####
         #### important 
         ####
@@ -213,7 +208,7 @@ class Model:
         if min(x) < 0:
             return sys.maxsize
         # proportions: breaking them down into different buckets 
-        predictions = self.model_predict(x, nTrials, props, cores, bins)
+        predictions = self.model_predict(x, props)
         # cdf_props_congruent:
         # what percent of RTs fall within those buckets
         # cdf_props_congruents: list of percentages that fall within quantiles, percentage of RTs that are congruent
@@ -254,7 +249,7 @@ class Model:
             return chisquare
     
     # make parameters a dictionary and loop over keys 
-    def parallel_sim(self, function, parameters, nTrials=5000, cores=4, bins=4):
+    def parallel_sim(self, function, parameters):
         """
         Runs parallel simulations for a specific model. 
 
@@ -270,15 +265,15 @@ class Model:
         # param_list = list(parameters.values()) + list(int(nTrials/bins))
  
         param_list = list(parameters) 
-        param_list.append(int(nTrials/bins))
+        param_list.append(int(Variables.NTRIALS/Variables.BINS))
         param_tuple = tuple(param_list)
-        jobs.append(param_tuple * bins)
-        jobs = jobs*bins
+        jobs.append(param_tuple * Variables.BINS)
+        jobs = jobs*Variables.BINS
         
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (x,)
 
-        with Pool(cores) as pool:
+        with Pool(Variables.CORES) as pool:
             # appends for each list, unpacking results into lists 
             for x in pool.istarmap(function, jobs):
                 results.append(x)
@@ -404,7 +399,7 @@ class Model:
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
-    def model_predict(self, params, nTrials, props, cores, bins, dt=0.001, var=0.1):
+    def model_predict(self, params, props):
         """
         Predicts using the behavioral model. 
         @params (dict): 
@@ -416,7 +411,7 @@ class Model:
         @var (float): variance
         """
         np.random.seed(100)
-        sim_data = self.parallel_sim(self.model_simulation, params, nTrials, cores, bins)
+        sim_data = self.parallel_sim(self.model_simulation, params)
 
         sim_data_congruent = sim_data[sim_data['congruency']=='congruent']
         sim_data_incongruent = sim_data[sim_data['congruency']=='incongruent']

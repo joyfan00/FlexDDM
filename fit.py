@@ -40,7 +40,15 @@ mybins = 1
 #         sd_0 = parameters['sd_0']
 #         sd_r = parameters['sd_r']
 #         tau = parameters['tau']
+
+#SSP PARS
 pars = {'alpha':0.5, 'beta':0.5, 'p':0.5, 'sd_0':0.5, 'sd_r':0.5, 'tau':0.5}
+
+#DSTP PARS
+# pars = {'alphaSS': 1, "betaSS": 0.5, "deltaSS": 0.4, "alphaRS": 1, "betaRS1": 0.5, "delta_target": .05, "delta_flanker": .05, "deltaRS2": 1.5, "tau": .3}
+
+
+
 for s in range(36, 110):
     print(s)
     with open('output_dmc_%s.txt' % s, 'w') as output:
