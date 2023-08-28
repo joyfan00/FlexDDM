@@ -25,7 +25,7 @@ class DMC (Model):
         self.bounds = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
-    def model_simulation(self, parameters, dt, var, nTrials, noiseseed):
+    def model_simulation(self, parameters):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -50,24 +50,24 @@ class DMC (Model):
 
         choicelist = []
         rtlist = []
-        np.random.seed(noiseseed)
-        update_jitter = np.random.normal(loc=0, scale=var, size=10000)
+        np.random.seed(Variables.NOISESEED)
+        update_jitter = np.random.normal(loc=0, scale=Variables.VAR, size=10000)
 
         ### Add congruent list (make first half congruent)
-        congruence_list = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)
+        congruence_list = ['congruent'] * (Variables.NTRIALS // 2) + ['incongruent'] * (Variables.NTRIALS // 2)
         iter = 0
-        for n in range(0, nTrials):
+        for n in range(0, Variables.NTRIALS):
             # congruence
             isCongruent = False
-            if n < nTrials / 2:
+            if n < Variables.NTRIALS / 2:
                 isCongruent = True
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta*alpha/2 - (1-beta)*alpha/2
             random.seed(iter)
             iter += 1
             while (evidence < alpha/2 and evidence > -alpha/2): # keep accumulating evidence until you reach a threshold
-                evidence += self.calculateDelta(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)*dt + random.choice(update_jitter)
-                t += dt # increment time by the unit dt
+                evidence += self.calculateDelta(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)*Variables.DT + random.choice(update_jitter)
+                t += Variables.DT # increment time by the unit dt
                 if evidence > alpha/2:
                     choicelist.append(1) # choose the upper threshold action
                     rtlist.append(t)
@@ -75,7 +75,7 @@ class DMC (Model):
                     choicelist.append(0) # choose the lower threshold action
                     rtlist.append(t)
 
-        return (range(1, nTrials+1), choicelist, rtlist, congruence_list)
+        return (range(1, Variables.NTRIALS+1), choicelist, rtlist, congruence_list)
     
     def calculateDelta (self, shape, characteristic_time, peak_amplitude, automatic_time, mu_c, congruence):
         """
