@@ -411,6 +411,8 @@ class Model:
         @var (float): variance
         """
         np.random.seed(100)
+        print('hi')
+        print(params)
         sim_data = self.parallel_sim(self.model_simulation, params)
 
         sim_data_congruent = sim_data[sim_data['congruency']=='congruent']

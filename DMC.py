@@ -22,7 +22,7 @@ class DMC (Model):
         Initializes a DMC model object. 
         """
         data = getRTData()
-        self.bounds = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(data['rt']))]
+        self.bounds = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
     def model_simulation(self, parameters):

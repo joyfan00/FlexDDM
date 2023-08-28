@@ -24,9 +24,9 @@ mpp.Pool.istarmap = Model.istarmap
 # mydata = data
 
 # s = 24
-mynTrials = 1
-mycores = 1
-mybins = 1
+# mynTrials = 1
+# mycores = 1
+# mybins = 1
 
 ## GOOD OUTPUT 
 ## excel file with fit function with chi squared, bic (shows fit), parameter values, get it to make a csv
@@ -58,7 +58,7 @@ for s in range(36, 110):
         while fitstat != fitstat2:
             print('run %s' % runint)
             fitstat2 = fitstat
-            pars, fitstat = shrinking_spotlight.fit(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], pars, mynTrials, mycores, mybins, run=runint)
+            pars, fitstat = shrinking_spotlight.fit(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], pars, run=runint)
             print(", ".join(str(x) for x in pars))
             print(" X^2 = %s" % fitstat)
             runint += 1
@@ -66,7 +66,7 @@ for s in range(36, 110):
         quantiles_caf = [0.25, 0.5, 0.75]
         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
         myprops = shrinking_spotlight.proportions(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], quantiles_cdf, quantiles_caf)
-        bic = shrinking_spotlight.model_function(pars, myprops, mynTrials, mycores, mybins, final=True)
+        bic = shrinking_spotlight.model_function(pars, myprops, final=True)
         output.write(", ".join(str(x) for x in pars))
         output.write(" X^2 = %s" % fitstat)
         output.write(" bic = %s" % bic)
