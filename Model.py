@@ -70,6 +70,9 @@ class Model:
                 result._set_length
             ))
         return (item for chunk in result for item in chunk)
+    
+    def model_simulation(self, parameters):
+        pass
 
     # def model_simulation(self, parameters, dt, var, nTrials):
     #     """
@@ -174,12 +177,12 @@ class Model:
         """
         props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
         if run != 1:
-            fit = minimize(self.model_function, x0=params, args=(props), options={'maxiter': 100},
+            fit = minimize(self.model_function, x0=params, args=(props,), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
             print(props)
             fit = differential_evolution(self.model_function, bounds=self.bounds, 
-                                    args=(props), maxiter=1, seed=100,
+                                    args=(props,), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
                 
         bestparams = fit.x
