@@ -196,7 +196,7 @@ class Model:
         return self.model_fuction()
 
     @staticmethod
-    def model_function(self, x, props, predictions, final=False):
+    def model_function(x, props, predictions, final=False):
         ####
         #### important 
         ####
