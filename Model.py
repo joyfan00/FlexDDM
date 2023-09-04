@@ -70,7 +70,7 @@ class Model:
                 result._set_length
             ))
         return (item for chunk in result for item in chunk)
-    
+
     def model_simulation(self, parameters):
         pass
 
@@ -108,60 +108,61 @@ class Model:
     #         rtlist.append(t)
     #     return (range(1, nTrials+1), choicelist, rtlist, congruencylist)
 
-    def parallel_sim(self, function, parameters):
-        """
-        Runs a parallel simulation on a set of parameters given a specific function. 
+    # def parallel_sim(self, function, parameters):
+    #     """
+    #     Runs a parallel simulation on a set of parameters given a specific function. 
 
-        @function (str): the model being simulated
-        @parameters (dict): the parameters that will be input into the function being simulated
-        @nTrials (int): total number of trials to be distributed across the cores
-        @cores (int): the number of cores to distribute the simulation trials across
-        @bins (int): the number of groups that the trials are broken into to be distributed across the cores
-        """
-        jobs=[]
-        results = []
-        print(type(parameters))
+    #     @function (str): the model being simulated
+    #     @parameters (dict): the parameters that will be input into the function being simulated
+    #     @nTrials (int): total number of trials to be distributed across the cores
+    #     @cores (int): the number of cores to distribute the simulation trials across
+    #     @bins (int): the number of groups that the trials are broken into to be distributed across the cores
+    #     """
+    #     print("HELLO ONE")
+    #     jobs=[]
+    #     results = []
+    #     print(type(parameters))
 
-        # Create a list that contains all of the parameter values (input params + how many trials should go in each bin)
-        # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
-        values_list = [parameters]
+    #     # Create a list that contains all of the parameter values (input params + how many trials should go in each bin)
+    #     # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
+    #     values_list = [parameters]
         
-        print(values_list)
+    #     print(values_list)
         
-        ## preferably have dt, var, etc be defined by user in the beginning in the one file they run. only have default values for the fn the user is 
-        # using, not within the methods themselves
+    #     ## preferably have dt, var, etc be defined by user in the beginning in the one file they run. only have default values for the fn the user is 
+    #     # using, not within the methods themselves
 
-        #remove defaults from extending model classes for dt var etc, and add them to tuple here
+    #     #remove defaults from extending model classes for dt var etc, and add them to tuple here
 
-        # Turn the params list into a tuple
-        values_tuple = tuple(values_list)
-        print(values_tuple)
-        # Create a list of tuples (one tuple per bin)
+    #     # Turn the params list into a tuple
+    #     values_tuple = tuple(values_list)
+    #     print(values_tuple)
+    #     # Create a list of tuples (one tuple per bin)
 
-        ###important:
-        ### if we have self going into model_simulation -- we need to have it as an argument in the jobs tuple -
-            #otherwise istarmap wont
-        jobs = [values_tuple]*Variables.BINS
+    #     ###important:
+    #     ### if we have self going into model_simulation -- we need to have it as an argument in the jobs tuple -
+    #         #otherwise istarmap wont
+    #     jobs = [values_tuple]*Variables.BINS
 
-        # Label each tuple with its index #
-        for x in range(len(jobs)):
-            jobs[x] = jobs[x] + (x,)
+    #     # Label each tuple with its index #
+    #     for x in range(len(jobs)):
+    #         jobs[x] = jobs[x] + (x,)
 
-        # Pool is the number of threads 
-        with Pool(Variables.CORES) as pool:
+    #     # Pool is the number of threads 
+    #     with Pool(Variables.CORES) as pool:
 
-            for x in pool.istarmap(function, jobs):
-                results.append(x)
+    #         for x in pool.istarmap(function, jobs):
+    #             results.append(x)
 
-        acclist = [results[x][1] for x in range(len(jobs))]
-        rtlist = [results[x][2] for x in range(len(jobs))]
-        congruencylist = [results[x][3] for x in range(len(jobs))]
+    #     acclist = [results[x][1] for x in range(len(jobs))]
+    #     rtlist = [results[x][2] for x in range(len(jobs))]
+    #     congruencylist = [results[x][3] for x in range(len(jobs))]
 
-        sim_data = pd.DataFrame({'accuracy': [item for sublist in acclist for item in sublist],
-                                'rt': [item for sublist in rtlist for item in sublist],
-                                'congruency': [item for sublist in congruencylist for item in sublist]})
+    #     sim_data = pd.DataFrame({'accuracy': [item for sublist in acclist for item in sublist],
+    #                             'rt': [item for sublist in rtlist for item in sublist],
+    #                             'congruency': [item for sublist in congruencylist for item in sublist]})
 
-        return sim_data
+    #     return sim_data
     
 
     def fit(self, data, params, run=1):
@@ -176,20 +177,26 @@ class Model:
         @run (int): counter for what run number 
         """
         props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
+        bounds_var = self.bounds
+        predictions = self.model_predict(params, props)
         if run != 1:
-            fit = minimize(self.model_function, x0=params, args=(props,), options={'maxiter': 100},
+            fit = minimize(Model.model_function, x0=params, args=(props,predictions), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
             print(props)
-            fit = differential_evolution(self.model_function, bounds=self.bounds, 
-                                    args=(props,), maxiter=1, seed=100,
+            fit = differential_evolution(Model.model_function, bounds=bounds_var, 
+                                    args=(props,predictions), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
                 
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
     
-    def model_function(self, x, props, final=False):
+    def model_function_calculations(self):
+        return self.model_fuction()
+
+    @staticmethod
+    def model_function(self, x, props, predictions, final=False):
         ####
         #### important 
         ####
@@ -210,8 +217,6 @@ class Model:
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
         if min(x) < 0:
             return sys.maxsize
-        # proportions: breaking them down into different buckets 
-        predictions = self.model_predict(x, props)
         # cdf_props_congruent:
         # what percent of RTs fall within those buckets
         # cdf_props_congruents: list of percentages that fall within quantiles, percentage of RTs that are congruent
@@ -262,19 +267,34 @@ class Model:
         @cores (int): number of cores 
         @bins (int): number of bins 
         """
+        
         jobs=[]
         results = []
 
-        # param_list = list(parameters.values()) + list(int(nTrials/bins))
- 
-        param_list = list(parameters) 
-        param_list.append(int(Variables.NTRIALS/Variables.BINS))
-        param_tuple = tuple(param_list)
-        jobs.append(param_tuple * Variables.BINS)
-        jobs = jobs*Variables.BINS
+        # Create a list that contains all of the parameter values (input params + how many trials should go in each bin)
+        # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
+        values_list = list(parameters.values())
+        
+        print(values_list)
+        
+        ## preferably have dt, var, etc be defined by user in the beginning in the one file they run. only have default values for the fn the user is 
+        # using, not within the methods themselves
+
+        #remove defaults from extending model classes for dt var etc, and add them to tuple here
+
+        # Turn the params list into a tuple
+        values_tuple = tuple(values_list)
+        print(values_tuple)
+        # Create a list of tuples (one tuple per bin)
+
+        ###important:
+        ### if we have self going into model_simulation -- we need to have it as an argument in the jobs tuple -
+            #otherwise istarmap wont
+        jobs = [values_tuple]*Variables.BINS
         
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (x,)
+            print("1 " + str(jobs[x]))
 
         with Pool(Variables.CORES) as pool:
             # appends for each list, unpacking results into lists 
@@ -402,6 +422,7 @@ class Model:
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
+  
     def model_predict(self, params, props):
         """
         Predicts using the behavioral model. 
