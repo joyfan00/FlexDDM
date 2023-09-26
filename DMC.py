@@ -16,12 +16,13 @@ class DMC (Model):
 
     param_number = 7
     global bounds
+    global data
 
     def __init__(self):
         """
         Initializes a DMC model object. 
         """
-        data = getRTData()
+        self.data = getRTData()
         self.bounds = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
