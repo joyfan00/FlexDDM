@@ -26,7 +26,8 @@ class DMC (Model):
         self.bounds = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
-    def model_simulation(self, parameters):
+    @staticmethod
+    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -37,17 +38,17 @@ class DMC (Model):
         @noiseseed (int): random seed for noise consistency
         """
         # quick check to make sure that dictionary is inputted correctly 
-        if (len(parameters) != self.param_number):
-            print('Dictionary input is not correct.')
+        # if (len(parameters) != self.param_number):
+        #     print('Dictionary input is not correct.')
         
-        # define variables 
-        alpha = parameters['alpha']
-        beta = parameters['beta']
-        tau = parameters['tau']
-        shape = parameters['shape']
-        characteristic_time = parameters['characteristic_time']
-        peak_amplitude = parameters['peak_amplitude']
-        mu_c = parameters['mu_c']
+        # # define variables 
+        # alpha = parameters['alpha']
+        # beta = parameters['beta']
+        # tau = parameters['tau']
+        # shape = parameters['shape']
+        # characteristic_time = parameters['characteristic_time']
+        # peak_amplitude = parameters['peak_amplitude']
+        # mu_c = parameters['mu_c']
 
         choicelist = []
         rtlist = []

@@ -71,7 +71,8 @@ class Model:
             ))
         return (item for chunk in result for item in chunk)
 
-    def model_simulation(self, parameters):
+    @staticmethod
+    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c):
         pass
 
     # def model_simulation(self, parameters, dt, var, nTrials):
@@ -165,7 +166,7 @@ class Model:
     #     return sim_data
     
 
-    def fit(self, data, params, run=1):
+    def fit(self, function, data, params, run=1):
         """
         Fits the data according to the model. 
 
@@ -178,12 +179,12 @@ class Model:
         """
         props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
         bounds_var = self.bounds
-        predictions = self.model_predict(params, props)
+        predictions = self.model_predict(function, params, props)
         if run != 1:
             fit = minimize(Model.model_function, x0=params, args=(props,predictions), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
-            print(props)
+            # print(props)
             fit = differential_evolution(Model.model_function, bounds=bounds_var, 
                                     args=(props,predictions), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
@@ -423,7 +424,7 @@ class Model:
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
   
-    def model_predict(self, params, props):
+    def model_predict(self, function, params, props):
         """
         Predicts using the behavioral model. 
         @params (dict): 
@@ -437,7 +438,9 @@ class Model:
         np.random.seed(100)
         print('hi')
         print(params)
-        sim_data = self.parallel_sim(self.model_simulation, params)
+        print(type(params))
+        # THIS IS WHERE MODEL SIMULATION IS CALLED
+        sim_data = self.parallel_sim(function, params)
 
         sim_data_congruent = sim_data[sim_data['congruency']=='congruent']
         sim_data_incongruent = sim_data[sim_data['congruency']=='incongruent']

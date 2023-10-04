@@ -11,7 +11,7 @@ from variables import Variables
 from file_input import *
 
 # convert to jupyter notebook 
-shrinking_spotlight = SSP()
+shrinking_spotlight = DMC()
 
 # updated Pool with istarmap function 
 # needs to be run before istarmap function 
@@ -58,7 +58,8 @@ for s in range(36, 110):
         while fitstat != fitstat2:
             print('run %s' % runint)
             fitstat2 = fitstat
-            pars, fitstat = shrinking_spotlight.fit(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], pars, run=runint)
+            print(runint)
+            pars, fitstat = shrinking_spotlight.fit(shrinking_spotlight.model_simulation, shrinking_spotlight.data[shrinking_spotlight.data['id']==s], pars, run=runint)
             print(", ".join(str(x) for x in pars))
             print(" X^2 = %s" % fitstat)
             runint += 1

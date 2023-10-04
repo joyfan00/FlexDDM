@@ -26,7 +26,7 @@ class SSP (Model):
         self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
     
-    def model_simulation(self, parameters):
+    def model_simulation(self, alpha, beta, p, sd_0, sd_r, tau):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -37,16 +37,16 @@ class SSP (Model):
         @noiseseed (int): random seed for noise consistency
         """
         # quick check to make sure that dictionary is inputted correctly 
-        if (len(parameters) != self.param_number):
-            print('Dictionary input is not correct.')
+        # if (len(parameters) != self.param_number):
+        #     print('Dictionary input is not correct.')
 
-        # define variables f
-        alpha = parameters['alpha']
-        beta = parameters['beta']
-        p = parameters['p']
-        sd_0 = parameters['sd_0']
-        sd_r = parameters['sd_r']
-        tau = parameters['tau']
+        # # define variables f
+        # alpha = parameters['alpha']
+        # beta = parameters['beta']
+        # p = parameters['p']
+        # sd_0 = parameters['sd_0']
+        # sd_r = parameters['sd_r']
+        # tau = parameters['tau']
 
         # 
         scale = 10000
