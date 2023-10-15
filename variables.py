@@ -8,7 +8,7 @@ class Variables:
 
     DT = 0.001
     VAR = 0.1
-    NTRIALS = 1
+    NTRIALS = 100
     NOISESEED = 50
     CORES = 4
     BINS = 4

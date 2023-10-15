@@ -27,7 +27,7 @@ class DMC (Model):
         super().__init__(self.param_number, self.bounds)
 
     @staticmethod
-    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c):
+    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c, dt=0.001, var=.1, nTrials=5000, noiseseed=0):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -49,6 +49,7 @@ class DMC (Model):
         # characteristic_time = parameters['characteristic_time']
         # peak_amplitude = parameters['peak_amplitude']
         # mu_c = parameters['mu_c']
+        print()
 
         choicelist = []
         rtlist = []
@@ -56,6 +57,8 @@ class DMC (Model):
         update_jitter = np.random.normal(loc=0, scale=Variables.VAR, size=10000)
 
         ### Add congruent list (make first half congruent)
+        # it assumes an even number of trials within each job -> make better 
+        # randomly decide the last element to be congruent or incongruent 
         congruence_list = ['congruent'] * (Variables.NTRIALS // 2) + ['incongruent'] * (Variables.NTRIALS // 2)
         iter = 0
         for n in range(0, Variables.NTRIALS):
@@ -67,8 +70,13 @@ class DMC (Model):
             evidence = beta*alpha/2 - (1-beta)*alpha/2
             random.seed(iter)
             iter += 1
+            print(shape)
+            print(characteristic_time)
+            print(peak_amplitude)
             while (evidence < alpha/2 and evidence > -alpha/2): # keep accumulating evidence until you reach a threshold
-                evidence += self.calculateDelta(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)*Variables.DT + random.choice(update_jitter)
+                print("hello 2")
+                print(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)
+                evidence += DMC.calculateDelta(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)*Variables.DT + random.choice(update_jitter)
                 t += Variables.DT # increment time by the unit dt
                 if evidence > alpha/2:
                     choicelist.append(1) # choose the upper threshold action
@@ -79,16 +87,10 @@ class DMC (Model):
 
         return (range(1, Variables.NTRIALS+1), choicelist, rtlist, congruence_list)
     
-    def calculateDelta (self, shape, characteristic_time, peak_amplitude, automatic_time, mu_c, congruence):
-        """
-        Calculates the delta in accordance to the time. Necessary for DMC model simulations.
-        @shape (float): shape parameter of the automatic process drift rate
-        @characteristic_time (float): characteristic time parameter of the automatic process drift rate
-        @peak_amplitude (float): peak amplitude parameter of the automatic process drift rate
-        @automatic_time (float): automatic time parameter of the automatic process drift rate
-        @mu_c (float): controlled process drift rate
-        """
-        if not congruence:
+    @staticmethod
+    def calculateDelta(shape, characteristic_time, peak_amplitude, automatic_time, mu_c, is_congruent):
+        print("hello")
+        if not is_congruent:
             return (-peak_amplitude * math.exp(-(automatic_time / characteristic_time)) *
             math.pow(((automatic_time * math.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / automatic_time) - (1 / characteristic_time))) + mu_c
         return (peak_amplitude * math.exp(-(automatic_time / characteristic_time)) *

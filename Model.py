@@ -181,23 +181,20 @@ class Model:
         bounds_var = self.bounds
         predictions = self.model_predict(function, params, props)
         if run != 1:
-            fit = minimize(Model.model_function, x0=params, args=(props,predictions), options={'maxiter': 100},
+            fit = minimize(Model.model_function, x0=params, args=(props,predictions,self.param_number), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
             # print(props)
             fit = differential_evolution(Model.model_function, bounds=bounds_var, 
-                                    args=(props,predictions), maxiter=1, seed=100,
+                                    args=(props,predictions,self.param_number), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
                 
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
-    
-    def model_function_calculations(self):
-        return self.model_fuction()
 
     @staticmethod
-    def model_function(x, props, predictions, final=False):
+    def model_function(x, props, predictions, param_number, final=False):
         ####
         #### important 
         ####
@@ -242,7 +239,7 @@ class Model:
             # refactor so not limited to these 3 models --> have free param for # of model params
             for i, j in enumerate(empirical_proportions):
                 finalsum += 250 * j * np.log(model_proportions[i])
-            return -2 * finalsum + self.param_number * np.log(250)
+            return -2 * finalsum + param_number * np.log(250)
         for i, j in enumerate(empirical_proportions):
             chisquare += 250 * j * np.log(j / model_proportions[i])
         chisquare = chisquare * 2
@@ -268,13 +265,12 @@ class Model:
         @cores (int): number of cores 
         @bins (int): number of bins 
         """
-        
         jobs=[]
         results = []
 
         # Create a list that contains all of the parameter values (input params + how many trials should go in each bin)
         # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
-        values_list = list(parameters.values())
+        values_list = list(parameters)
         
         print(values_list)
         
@@ -294,7 +290,7 @@ class Model:
         jobs = [values_tuple]*Variables.BINS
         
         for x in range(len(jobs)):
-            jobs[x] = jobs[x] + (x,)
+            jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/Variables.BINS)) + (x,)
             print("1 " + str(jobs[x]))
 
         with Pool(Variables.CORES) as pool:
