@@ -69,11 +69,12 @@ for s in range(36, 110):
         quantiles_caf = [0.25, 0.5, 0.75]
         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
         myprops = shrinking_spotlight.proportions(shrinking_spotlight.data[shrinking_spotlight.data['id']==s], quantiles_cdf, quantiles_caf)
+        predictions = shrinking_spotlight.model_predict(DMC.model_simulation, pars, myprops)
         # x, props, predictions, param_number
-        print(pars)
+        # print(pars)
         print(myprops)
-        print(shrinking_spotlight.param_number)
-        bic = shrinking_spotlight.model_function([0, 0], pars, myprops, shrinking_spotlight.param_number, final=True)
+        # print(shrinking_spotlight.param_number)
+        bic = shrinking_spotlight.model_function(pars, myprops, predictions, shrinking_spotlight.param_number, final=True)
         output.write(", ".join(str(x) for x in pars))
         output.write(" X^2 = %s" % fitstat)
         output.write(" bic = %s" % bic)

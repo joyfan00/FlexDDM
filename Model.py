@@ -220,6 +220,10 @@ class Model:
         # cdf_props_congruents: list of percentages that fall within quantiles, percentage of RTs that are congruent
         # compare to the data simulated 
         # keep adjusting until get to those percentages within quantiles with the simulated data 
+        if final == True:
+            print("PROPS")
+            print(props)
+            print(type(props))
         empirical_proportions = [props['cdf_props_congruent'], props['cdf_props_incongruent'],
                                 props['caf_props_congruent'], props['caf_props_incongruent']]
         model_proportions = [predictions['cdf_props_congruent'], predictions['cdf_props_incongruent'],
@@ -272,7 +276,7 @@ class Model:
         # Each extending model class has default dt, var, nTrial, and noiseSeed values for their model_simulation() 
         values_list = list(parameters)
         
-        print(values_list)
+        # print(values_list)
         
         ## preferably have dt, var, etc be defined by user in the beginning in the one file they run. only have default values for the fn the user is 
         # using, not within the methods themselves
@@ -281,7 +285,7 @@ class Model:
 
         # Turn the params list into a tuple
         values_tuple = tuple(values_list)
-        print(values_tuple)
+        # print(values_tuple)
         # Create a list of tuples (one tuple per bin)
 
         ###important:
@@ -291,7 +295,7 @@ class Model:
         
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/Variables.BINS)) + (x,)
-            print("1 " + str(jobs[x]))
+            # print("1 " + str(jobs[x]))
 
         with Pool(Variables.CORES) as pool:
             # appends for each list, unpacking results into lists 
@@ -432,9 +436,6 @@ class Model:
         @var (float): variance
         """
         np.random.seed(100)
-        print('hi')
-        print(params)
-        print(type(params))
         # THIS IS WHERE MODEL SIMULATION IS CALLED
         sim_data = self.parallel_sim(function, params)
 
