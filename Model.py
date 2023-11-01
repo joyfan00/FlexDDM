@@ -183,11 +183,16 @@ class Model:
         if run != 1:
             fit = minimize(Model.model_function, x0=params, args=(props,predictions,self.param_number), options={'maxiter': 100},
                         method='Nelder-Mead')
+            #fit = minimize(Model.model_function, x0=params, args=(data,props,self.bounds,self.param_number,function), options={'maxiter': 100},
+                        #method='Nelder-Mead')
         else:
             # print(props)
             fit = differential_evolution(Model.model_function, bounds=bounds_var, 
-                                    args=(props,predictions,self.param_number), maxiter=1, seed=100,
+                                    args=(props,predictions, self.param_number), maxiter=1, seed=100,
                                     disp=True, popsize=100, polish=True)
+            #fit = differential_evolution(Model.model_function, bounds=self.bounds, 
+            #                        args=(data,params, props,bounds_var,self.param_number, function), maxiter=1, seed=100,
+            #                        disp=True, popsize=100, polish=True)
                 
         bestparams = fit.x
         fitstat = fit.fun
@@ -211,6 +216,10 @@ class Model:
         @bins (int): number of bins 
         @final (bool): if this is the final trial or not  
         """
+
+        # model = Model(param_number, bounds)
+        # predictions = model.model_predict(function, x, props)
+
         # print(x)
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
         if min(x) < 0:
