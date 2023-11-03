@@ -17,32 +17,7 @@ shrinking_spotlight = DMC()
 # needs to be run before istarmap function 
 mpp.Pool.istarmap = Model.istarmap
 
-# mydata = getRTData()
-# print(data)
-# data = pd.DataFrame({'id': data['N_ind'], 'congruency': data['condition'],'rt': [x/1000 for x in data['RT']], 'accuracy': [x-1 for x in data['choice']]})
-# data['congruency'] = ['congruent' if x == 1 else 'incongruent' for x in data['congruency']]
-# mydata = data
-
-# s = 24
-# mynTrials = 1
-# mycores = 1
-# mybins = 1
-
-## GOOD OUTPUT 
-## excel file with fit function with chi squared, bic (shows fit), parameter values, get it to make a csv
-
-# pars = [1, .5, .4, 1.5, .04, .3] #ssp
-# pars = [1, .5, .4, 1, .5, .05, .05, 1.5, .3] #dstp
-# pars = [.5, .5, .5, .5, .5, .5, .5]
-# alpha = parameters['alpha']
-#         beta = parameters['beta']
-#         p = parameters['p']
-#         sd_0 = parameters['sd_0']
-#         sd_r = parameters['sd_r']
-#         tau = parameters['tau']
-
-#SSP PARS
-# pars = {'alpha':0.5, 'beta':0.5, 'p':0.5, 'sd_0':0.5, 'sd_r':0.5, 'tau':0.5}
+#'sd_r':0.5, 'tau':0.5}
 
 #DSTP PARS
 # pars = {'alphaSS': 1, "betaSS": 0.5, "deltaSS": 0.4, "alphaRS": 1, "betaRS1": 0.5, "delta_target": .05, "delta_flanker": .05, "deltaRS2": 1.5, "tau": .3}
@@ -51,7 +26,7 @@ mpp.Pool.istarmap = Model.istarmap
 # pars = {'alpha':0.5, 'beta':0.5, 'tau':0.5, 'shape':5, 'characteristic_time':0.5, 'peak_amplitude':0.5, 'mu_c':0.5}
 pars = [0.5, 0.5, 0.5, 5, 0.5, 0.5, 0.5]
 
-for s in range(36, 110):
+for s in range(36, 40):
     print(s)
     with open('output_dmc_%s.txt' % s, 'w') as output:
         print('Model fitting ID %s' % s)
