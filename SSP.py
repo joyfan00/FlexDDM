@@ -1,7 +1,7 @@
 # packages 
 from Model import Model
 from variables import Variables
-from file_input import *
+# from file_input import *
 # import pandas as pd
 import numpy as np
 import math
@@ -17,12 +17,13 @@ class SSP (Model):
     param_number = 6
     global bounds
     global data
+    variables = Variables()
     
     def __init__(self):
         """
         Initializes a DSTP model object. 
         """
-        self.data = getRTData()
+        self.data = variables.getRTData()
         self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
     

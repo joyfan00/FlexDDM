@@ -2,7 +2,7 @@
 import numpy as np
 import random
 import pandas as pd
-from file_input import *
+# from file_input import *
 from Model import Model
 from variables import Variables
 
@@ -12,6 +12,7 @@ This class is a specific DSTP model class.
 
 class DSTP(Model):
 
+    variables = Variables()
     data = pd.DataFrame()
     param_number = 9
     global bounds
@@ -20,7 +21,7 @@ class DSTP(Model):
         """
         Initializes a DSTP model object. 
         """
-        self.data = getRTData()
+        self.data = variables.getRTData()
         self.bounds = [(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,2),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
 

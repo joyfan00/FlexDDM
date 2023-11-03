@@ -4,7 +4,7 @@ import numpy as np
 import random
 import math
 from Model import Model
-from file_input import *
+# from file_input import *
 from variables import Variables
 import pandas as pd
 
@@ -17,12 +17,14 @@ class DMC (Model):
     param_number = 7
     global bounds
     global data
+    variables = Variables()
+
 
     def __init__(self):
         """
         Initializes a DMC model object. 
         """
-        self.data = getRTData()
+        self.data = variables.getRTData()
         self.bounds = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
