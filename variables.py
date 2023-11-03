@@ -1,3 +1,6 @@
+import json;
+from file_input import *
+
 # static variables 
 class Variables:
 
@@ -12,6 +15,9 @@ class Variables:
     NOISESEED = 50
     CORES = 4
     BINS = 4
+
+    DATA = getRTData()
+    BOUNDS = [(0,1),(0,1),(1,20),(0,10),(0,10),(0,1),(0,min(DATA['rt']))]
 
     def __init__(self) -> None:
         pass
