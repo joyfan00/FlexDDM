@@ -1,11 +1,12 @@
 # packages 
 from Model import Model
 from variables import Variables
-# from file_input import *
+from file_input import *
 # import pandas as pd
 import numpy as np
 import math
 import random
+# from file_input import *
 
 """
 This class is a specific DSTP model class. 
@@ -23,7 +24,7 @@ class SSP (Model):
         """
         Initializes a DSTP model object. 
         """
-        self.data = variables.getRTData()
+        self.data = getRTData()
         self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
     

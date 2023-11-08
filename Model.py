@@ -180,16 +180,16 @@ class Model:
         props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
         bounds_var = self.bounds
         #predictions = self.model_predict(function, params, props)
-        if run != 1:
-            fit = minimize(Model.model_function, x0=params, args=(props,self.param_number,function), options={'maxiter': 100},
-                        method='Nelder-Mead')
+        if run > 1:
+            fit = minimize(Model.model_function, x0=params, args=(props,self.param_number,function, data, bounds_var), options={'maxiter': 100},
+                        method='L-BFGS-B')
             #fit = minimize(Model.model_function, x0=params, args=(data,props,self.bounds,self.param_number,function), options={'maxiter': 100},
                         #method='Nelder-Mead')
         else:
             # print(props)
             fit = differential_evolution(Model.model_function, bounds=bounds_var, 
-                                    args=(props,self.param_number,function), maxiter=1, seed=100,
-                                    disp=True, popsize=100, polish=True)
+                                    args=(props,self.param_number,function, data, bounds_var), maxiter=1, seed=10,
+                                    disp=True, popsize=100, polish=False)
             #fit = differential_evolution(Model.model_function, bounds=self.bounds, 
             #                        args=(data,params, props,bounds_var,self.param_number, function), maxiter=1, seed=100,
             #                        disp=True, popsize=100, polish=True)
@@ -199,7 +199,7 @@ class Model:
         return bestparams, fitstat
 
     @staticmethod
-    def model_function(x, props, param_number, function, final=False):
+    def model_function(x, props, param_number, function, data, bounds, final=False):
         ####
         #### important 
         ####
@@ -216,12 +216,16 @@ class Model:
         @bins (int): number of bins 
         @final (bool): if this is the final trial or not  
         """
-        m = Model(bounds=Variables.BOUNDS, param_number=param_number)
-        predictions = m.model_predict(function, x, props)
         # print(x)
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
+        print("BOUNDS")
+        print(bounds)
+        
         if min(x) < 0:
             return sys.maxsize
+        m = Model(bounds=bounds, param_number=param_number)
+        predictions = m.model_predict(function, x, props)
+        
         # cdf_props_congruent:
         # what percent of RTs fall within those buckets
         # cdf_props_congruents: list of percentages that fall within quantiles, percentage of RTs that are congruent
@@ -303,6 +307,9 @@ class Model:
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/Variables.BINS)) + (x,)
             # print("1 " + str(jobs[x]))
+
+        print("JOBS")
+        print(jobs)
 
         with Pool(Variables.CORES) as pool:
             # appends for each list, unpacking results into lists 
@@ -434,7 +441,7 @@ class Model:
     def model_predict(self, function, params, props):
         """
         Predicts using the behavioral model. 
-        @params (dict): 
+        @params (list):
         @nTrials (int):
         @props ():
         @cores (int):
@@ -442,6 +449,9 @@ class Model:
         @dt (float): change in time
         @var (float): variance
         """
+        print("MODEL PREDICT PARAMS")
+        print(type(params))
+        print(params)
         np.random.seed(100)
         # THIS IS WHERE MODEL SIMULATION IS CALLED
         sim_data = self.parallel_sim(function, params)

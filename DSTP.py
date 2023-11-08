@@ -2,7 +2,7 @@
 import numpy as np
 import random
 import pandas as pd
-# from file_input import *
+from file_input import *
 from Model import Model
 from variables import Variables
 
@@ -12,7 +12,6 @@ This class is a specific DSTP model class.
 
 class DSTP(Model):
 
-    variables = Variables()
     data = pd.DataFrame()
     param_number = 9
     global bounds
@@ -21,11 +20,12 @@ class DSTP(Model):
         """
         Initializes a DSTP model object. 
         """
-        self.data = variables.getRTData()
+        self.data = getRTData()
         self.bounds = [(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,2),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds)
 
-    def model_simulation(self, parameters):
+    @staticmethod
+    def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS2, tau, dt=0.001, var=.1, nTrials=5000, noiseseed=0):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DSTP models- 
@@ -35,18 +35,6 @@ class DSTP(Model):
         @nTrials (int): number of trials
         @noiseseed (int): random seed for noise consistency
         """
-        if (len(parameters) != self.param_number):
-            print('Dictionary input is not correct.')
-        # define variables 
-        alphaSS = parameters['alphaSS']
-        betaSS = parameters['betaSS']
-        deltaSS = parameters['deltaSS']
-        alphaRS = parameters['alphaRS']
-        betaRS1 = parameters['betaRS1']
-        delta_target = parameters['delta_target']
-        delta_flanker = parameters['delta_flanker']
-        deltaRS2 = parameters['deltaRS2']
-        tau = parameters['tau']
 
         choicelist = []
         rtlist = []
