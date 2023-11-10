@@ -189,7 +189,7 @@ class Model:
             # print(props)
             fit = differential_evolution(Model.model_function, bounds=bounds_var, 
                                     args=(props,self.param_number,function, data, bounds_var), maxiter=1, seed=10,
-                                    disp=True, popsize=100, polish=False)
+                                    disp=True, popsize=100, polish=True)
             #fit = differential_evolution(Model.model_function, bounds=self.bounds, 
             #                        args=(data,params, props,bounds_var,self.param_number, function), maxiter=1, seed=100,
             #                        disp=True, popsize=100, polish=True)
