@@ -218,8 +218,8 @@ class Model:
         """
         # print(x)
         # x = np.divide(x, np.array([1, 1, 10, 100, 1, 10]))
-        print("BOUNDS")
-        print(bounds)
+        # print("BOUNDS")
+        # print(bounds)
         
         if min(x) < 0:
             return sys.maxsize
@@ -231,10 +231,10 @@ class Model:
         # cdf_props_congruents: list of percentages that fall within quantiles, percentage of RTs that are congruent
         # compare to the data simulated 
         # keep adjusting until get to those percentages within quantiles with the simulated data 
-        if final == True:
-            print("PROPS")
-            print(props)
-            print(type(props))
+        # if final == True:
+        #     print("PROPS")
+        #     print(props)
+        #     print(type(props))
         empirical_proportions = [props['cdf_props_congruent'], props['cdf_props_incongruent'],
                                 props['caf_props_congruent'], props['caf_props_incongruent']]
         model_proportions = [predictions['cdf_props_congruent'], predictions['cdf_props_incongruent'],
@@ -308,8 +308,8 @@ class Model:
             jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/Variables.BINS)) + (x,)
             # print("1 " + str(jobs[x]))
 
-        print("JOBS")
-        print(jobs)
+        # print("JOBS")
+        # print(jobs)
 
         with Pool(Variables.CORES) as pool:
             # appends for each list, unpacking results into lists 
@@ -449,9 +449,9 @@ class Model:
         @dt (float): change in time
         @var (float): variance
         """
-        print("MODEL PREDICT PARAMS")
-        print(type(params))
-        print(params)
+        # print("MODEL PREDICT PARAMS")
+        # print(type(params))
+        # print(params)
         np.random.seed(100)
         # THIS IS WHERE MODEL SIMULATION IS CALLED
         sim_data = self.parallel_sim(function, params)
