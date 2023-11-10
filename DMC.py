@@ -103,9 +103,8 @@ class DMC (Model):
         df = pd.DataFrame(columns=['alpha', 'beta', 'tau', 'shape', 'characteristic_time', 'peak_amplitude', 'mu_c', 'X^2', 'bic'])
 
         for s in range(startingParticipants, endingParticipants):
-            print(s)
+            print("PARTICIPANT " + str(s))
             # with open('output_dmc_%s.txt' % s, 'w') as output:
-            print('Model fitting ID %s' % s)
             fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
             runint=1
             while fitstat != fitstat2:
