@@ -182,7 +182,7 @@ class Model:
         #predictions = self.model_predict(function, params, props)
         if run > 1:
             fit = minimize(Model.model_function, x0=params, args=(props,self.param_number,function, data, bounds_var), options={'maxiter': 100},
-                        method='L-BFGS-B')
+                        method='Nelder-Mead')
             #fit = minimize(Model.model_function, x0=params, args=(data,props,self.bounds,self.param_number,function), options={'maxiter': 100},
                         #method='Nelder-Mead')
         else:
