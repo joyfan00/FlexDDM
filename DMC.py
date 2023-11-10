@@ -124,6 +124,6 @@ class DMC (Model):
             # print(pars)
             print(myprops)
             # print(shrinking_spotlight.param_number)
-            bic = Model.model_function(pars, myprops, predictions, self.param_number, self.data[self.data['id']==s], self.bounds, final=True)
+            bic = Model.model_function(pars, myprops, self.param_number, DMC.model_simulation, self.data[self.data['id']==s], self.bounds, final=True)
             df = df.append([pars[0], pars[1], pars[2], pars[3], pars[4], pars[5], pars[6], fitstat, bic])
         df.to_csv(fileName)
