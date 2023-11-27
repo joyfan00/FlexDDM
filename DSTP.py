@@ -15,6 +15,7 @@ class DSTP(Model):
     data = pd.DataFrame()
     param_number = 9
     global bounds
+    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS1', 'delta_target', 'delta_flanker', 'deltaRS2', 'tau']
     
     def __init__(self):
         """
@@ -22,7 +23,7 @@ class DSTP(Model):
         """
         self.data = getRTData()
         self.bounds = [(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,2),(0,min(self.data['rt']))]
-        super().__init__(self.param_number, self.bounds)
+        super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @staticmethod
     def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS2, tau, dt=0.001, var=.1, nTrials=5000, noiseseed=0):

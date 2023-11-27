@@ -35,8 +35,9 @@ class Model:
     global bounds
     global cdfs 
     global cafs
+    global parameter_names
 
-    def __init__(self, param_number, bounds):
+    def __init__(self, param_number, bounds, parameter_names):
         """
         Initializes a model object. 
         @param_number (int): the number of parameters (also known as variables) necessary for model 
@@ -44,6 +45,7 @@ class Model:
         """
         self.param_number = param_number
         self.bounds = bounds
+        self.parameter_names = parameter_names
 
     def istarmap(self, func, iterable, chunksize=1):
         """
@@ -181,25 +183,25 @@ class Model:
         bounds_var = self.bounds
         #predictions = self.model_predict(function, params, props)
         if run > 1:
-            fit = minimize(Model.model_function, x0=params, args=(props,self.param_number,function, data, bounds_var), options={'maxiter': 100},
+            fit = minimize(Model.model_function, x0=params, args=(props,self.param_number,self.parameter_names,function, data, bounds_var), options={'maxiter': 100},
                         method='Nelder-Mead')
             #fit = minimize(Model.model_function, x0=params, args=(data,props,self.bounds,self.param_number,function), options={'maxiter': 100},
                         #method='Nelder-Mead')
         else:
             # print(props)
             fit = differential_evolution(Model.model_function, bounds=bounds_var, 
-                                    args=(props,self.param_number,function, data, bounds_var), maxiter=1, seed=10,
+                                    args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=1, seed=10,
                                     disp=True, popsize=100, polish=True)
             #fit = differential_evolution(Model.model_function, bounds=self.bounds, 
             #                        args=(data,params, props,bounds_var,self.param_number, function), maxiter=1, seed=100,
             #                        disp=True, popsize=100, polish=True)
-                
+            
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
 
     @staticmethod
-    def model_function(x, props, param_number, function, data, bounds, final=False):
+    def model_function(x, props, param_number, parameter_names, function, data, bounds, final=False):
         ####
         #### important 
         ####
@@ -223,7 +225,7 @@ class Model:
         
         if min(x) < 0:
             return sys.maxsize
-        m = Model(bounds=bounds, param_number=param_number)
+        m = Model(bounds=bounds, param_number=param_number, parameter_names=parameter_names)
         predictions = m.model_predict(function, x, props)
         
         # cdf_props_congruent:
@@ -307,9 +309,9 @@ class Model:
         for x in range(len(jobs)):
             jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/Variables.BINS)) + (x,)
             # print("1 " + str(jobs[x]))
-
-        # print("JOBS")
-        # print(jobs)
+        
+        print("JOBS")
+        print(jobs)
 
         with Pool(Variables.CORES) as pool:
             # appends for each list, unpacking results into lists 
@@ -499,6 +501,64 @@ class Model:
         else:
             props_caf.append(0)
         return props_cdf, props_caf
+    
+    def runSimulations(self, pars, startingParticipants, endingParticipants, function, fileName='output.csv'):
+        df = pd.DataFrame(columns=self.parameter_names + ['X^2', 'bic'])
+
+        for s in range(startingParticipants, endingParticipants):
+            print("PARTICIPANT " + str(s))
+            # with open('output_dmc_%s.txt' % s, 'w') as output:
+            fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
+            runint=1
+            while fitstat != fitstat2:
+                print('run %s' % runint)
+                fitstat2 = fitstat
+                print(runint)
+                pars, fitstat = self.fit(function, self.data[self.data['id']==s], pars, run=runint)
+                print(", ".join(str(x) for x in pars))
+                print(" X^2 = %s" % fitstat)
+                runint += 1
+            # make quantiles caf and cdf changeable 
+            quantiles_caf = [0.25, 0.5, 0.75]
+            quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
+            myprops = self.proportions(self.data[self.data['id']==s], quantiles_cdf, quantiles_caf)
+            predictions = self.model_predict(function, pars, myprops)
+            # x, props, predictions, param_number
+            # print(pars)
+            print(myprops)
+            # print(shrinking_spotlight.param_number)
+            bic = Model.model_function(pars, myprops, self.param_number, DMC.model_simulation, self.data[self.data['id']==s], self.bounds, final=True)
+            df.loc[len(df)] = pars + [fitstat, bic]
+        df.to_csv(fileName, index=False)
+    
+    # def runSimulations(self, pars, function, startingParticipants, endingParticipants, fileName='output.csv'):
+    #     df = pd.DataFrame(columns=self.parameter_names + ['X^2', 'bic'], index=None)
+
+    #     for s in range(startingParticipants, endingParticipants):
+    #         print("PARTICIPANT " + str(s))
+    #         # with open('output_dmc_%s.txt' % s, 'w') as output:
+    #         fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
+    #         runint=1
+    #         while fitstat != fitstat2:
+    #             print('run %s' % runint)
+    #             fitstat2 = fitstat
+    #             print(runint)
+    #             pars, fitstat = self.fit(function, self.data[self.data['id']==s], pars, run=runint)
+    #             print(", ".join(str(x) for x in pars))
+    #             print(" X^2 = %s" % fitstat)
+    #             runint += 1
+    #         # make quantiles caf and cdf changeable 
+    #         quantiles_caf = [0.25, 0.5, 0.75]
+    #         quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
+    #         myprops = self.proportions(self.data[self.data['id']==s], quantiles_cdf, quantiles_caf)
+    #         predictions = self.model_predict(function, pars, myprops)
+    #         # x, props, predictions, param_number
+    #         # print(pars)
+    #         print(myprops)
+    #         # print(shrinking_spotlight.param_number)
+    #         bic = Model.model_function(pars, myprops, self.param_number, self.parameter_names, function, self.data[self.data['id']==s], self.bounds, final=True)
+    #         df.loc[len(df)] = pars + [fitstat, bic]
+    #     df.to_csv(fileName, index=False)
 
 
 

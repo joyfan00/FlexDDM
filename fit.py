@@ -1,5 +1,7 @@
 from Model import Model
 from DMC import DMC
+from SSP import SSP
+from DSTP import DSTP
 import multiprocessing.pool as mpp
 import sys
 import json
@@ -9,7 +11,7 @@ from variables import Variables
 from file_input import *
 
 # convert to jupyter notebook 
-dmc = DMC()
+dstp = DSTP()
 
 # updated Pool with istarmap function 
 # needs to be run before istarmap function 
@@ -17,13 +19,18 @@ mpp.Pool.istarmap = Model.istarmap
 
 #'sd_r':0.5, 'tau':0.5}
 
+#pars = [1, 0.5, 0.4, 1.5, 0.04, 0.3]
+pars = [1, 0.5, 0.4, 1, 0.5, 0.05, 0.05, 1.5, 0.3]
+
 #DSTP PARS
 # pars = {'alphaSS': 1, "betaSS": 0.5, "deltaSS": 0.4, "alphaRS": 1, "betaRS1": 0.5, "delta_target": .05, "delta_flanker": .05, "deltaRS2": 1.5, "tau": .3}
 
 #DMC PARS
-# pars = {'alpha':0.5, 'beta':0.5, 'tau':0.5, 'shape':5, 'characteristic_time':0.5, 'peak_amplitude':0.5, 'mu_c':0.5}
-pars = [0.5, 0.5, 10, 5, 5, 0.5, 0.05]
-dmc.runSimulations(pars, 1, 2, fileName='output.csv')
+#pars = {'alpha':0.5, 'beta':0.5, 'tau':0.5, 'shape':5, 'characteristic_time':0.5, 'peak_amplitude':0.5, 'mu_c':0.5}
+#pars = [0.5, 0.5, 10, 5, 5, 0.5, 0.05]
+# dmc.runSimulations(pars, DMC.model_function, 1, 2, fileName='output.csv')
+
+dstp.runSimulations(pars, 1, 2, DSTP.model_simulation, fileName='output.csv')
 
 # df = pd.DataFrame(columns=['alpha', 'beta', 'tau', 'shape', 'characteristic_time', 'peak_amplitude', 'mu_c', 'X^2', 'bic'])
 

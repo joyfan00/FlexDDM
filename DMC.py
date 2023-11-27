@@ -18,6 +18,7 @@ class DMC (Model):
     param_number = 7
     global bounds
     global data
+    parameter_names = ['alpha', 'beta', 'tau', 'shape', 'characteristic_time', 'peak_amplitude', 'mu_c']
     variables = Variables()
 
 
@@ -27,7 +28,7 @@ class DMC (Model):
         """
         self.data = getRTData()
         self.bounds = [(0,1),(0,1),(1,20),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
-        super().__init__(self.param_number, self.bounds)
+        super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @staticmethod
     def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c, dt=0.001, var=.1, nTrials=5000, noiseseed=0):
@@ -99,31 +100,5 @@ class DMC (Model):
         return (peak_amplitude * math.exp(-(automatic_time / characteristic_time)) *
         math.pow(((automatic_time * math.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / automatic_time) - (1 / characteristic_time))) + mu_c
     
-    def runSimulations(self, pars, startingParticipants, endingParticipants, fileName='output.csv'):
-        df = pd.DataFrame(columns=['alpha', 'beta', 'tau', 'shape', 'characteristic_time', 'peak_amplitude', 'mu_c', 'X^2', 'bic'])
-
-        for s in range(startingParticipants, endingParticipants):
-            print("PARTICIPANT " + str(s))
-            # with open('output_dmc_%s.txt' % s, 'w') as output:
-            fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
-            runint=1
-            while fitstat != fitstat2:
-                print('run %s' % runint)
-                fitstat2 = fitstat
-                print(runint)
-                pars, fitstat = self.fit(DMC.model_simulation, self.data[self.data['id']==s], pars, run=runint)
-                print(", ".join(str(x) for x in pars))
-                print(" X^2 = %s" % fitstat)
-                runint += 1
-            # make quantiles caf and cdf changeable 
-            quantiles_caf = [0.25, 0.5, 0.75]
-            quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-            myprops = self.proportions(self.data[self.data['id']==s], quantiles_cdf, quantiles_caf)
-            predictions = self.model_predict(DMC.model_simulation, pars, myprops)
-            # x, props, predictions, param_number
-            # print(pars)
-            print(myprops)
-            # print(shrinking_spotlight.param_number)
-            bic = Model.model_function(pars, myprops, self.param_number, DMC.model_simulation, self.data[self.data['id']==s], self.bounds, final=True)
-            df = df.append([pars[0], pars[1], pars[2], pars[3], pars[4], pars[5], pars[6], fitstat, bic])
-        df.to_csv(fileName, index=False)
+    
+    
