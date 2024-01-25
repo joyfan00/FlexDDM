@@ -5,17 +5,18 @@ from DSTP import DSTP
 import multiprocessing.pool as mpp
 from file_input import *
 
+mpp.Pool.istarmap = Model.istarmap
+
 #DMC
-#dmc = DMC()
-#mpp.Pool.istarmap = Model.istarmap
-#pars = [0.5, 0.5, 10, 5, 5, 0.5, 0.05]
-#dmc.runSimulations(pars, DMC.model_function, 1, 2, fileName='output.csv')
+dmc = DMC()
+pars = [0.5, 0.5, 10, 5, 5, 0.5, 0.05]
+dmc.runSimulations(pars, 1, 5, DMC.model_function, fileName='output_dmc.csv')
 
 #SSP
-#ssp = SSP()
-#mpp.Pool.istarmap = Model.istarmap
-#pars = [1, 0.5, 0.4, 1.5, 0.04, 0.3]
-#ssp.runSimulations(pars, 1, 2, SSP.model_simulation, fileName='output_ssp.csv')
+ssp = SSP()
+mpp.Pool.istarmap = Model.istarmap
+pars = [1, 0.5, 0.4, 1.5, 0.04, 0.3]
+ssp.runSimulations(pars, 1, 2, SSP.model_simulation, fileName='output_ssp.csv')
 
 #DSTP
 dstp = DSTP()

@@ -76,10 +76,10 @@ class Model:
         props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
         bounds_var = self.bounds
         if run > 1:
-            fit = minimize(Model.model_function, x0=params, args=(props,self.param_number,self.parameter_names,function, data, bounds_var), options={'maxiter': 100},
+            fit = minimize(Model.model_function, bounds=bounds_var, x0=params, args=(props,self.param_number,self.parameter_names,function, data, bounds_var), options={'maxiter': 100},
                         method='Nelder-Mead')
         else:
-            fit = differential_evolution(Model.model_function, bounds=bounds_var, 
+            fit = differential_evolution(Model.model_function, bounds=bounds_var, x0=params,
                                     args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=1, seed=10,
                                     disp=True, popsize=100, polish=True)
             
