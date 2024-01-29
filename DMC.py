@@ -3,6 +3,7 @@
 import numpy as np
 import random
 import math
+import numba as nb
 from Model import Model
 from file_input import *
 from variables import Variables
@@ -27,11 +28,12 @@ class DMC (Model):
         Initializes a DMC model object. 
         """
         self.data = getRTData()
-        self.bounds = [(0,1),(0,1),(1,20),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
+        self.bounds = [(0,10),(0,1),(1,20),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
-    @staticmethod
-    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c, dt=0.001, var=.1, nTrials=5000, noiseseed=0):
+    # @staticmethod
+    @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
+    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
@@ -41,64 +43,47 @@ class DMC (Model):
         @nTrials (int): number of trials
         @noiseseed (int): random seed for noise consistency
         """
-        # quick check to make sure that dictionary is inputted correctly 
-        # if (len(parameters) != self.param_number):
-        #     print('Dictionary input is not correct.')
-        
-        # # define variables 
-        # alpha = parameters['alpha']
-        # beta = parameters['beta']
-        # tau = parameters['tau']
-        # shape = parameters['shape']
-        # characteristic_time = parameters['characteristic_time']
-        # peak_amplitude = parameters['peak_amplitude']
-        # mu_c = parameters['mu_c']
-        print()
 
-        choicelist = []
-        rtlist = []
-        np.random.seed(Variables.NOISESEED)
-        update_jitter = np.random.normal(loc=0, scale=Variables.VAR, size=10000)
+        choicelist = [np.nan]*nTrials
+        rtlist = [np.nan]*nTrials
+        # choicelist = []
+        # rtlist = []
+        np.random.seed(noiseseed)
+        update_jitter = np.random.normal(loc=0, scale=var, size=10000)
 
         ### Add congruent list (make first half congruent)
         # it assumes an even number of trials within each job -> make better 
         # randomly decide the last element to be congruent or incongruent 
-        congruence_list = ['congruent'] * (Variables.NTRIALS // 2) + ['incongruent'] * (Variables.NTRIALS // 2)
-        iter = 0
-        for n in range(0, Variables.NTRIALS):
+        congruence_list = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)
+
+        for n in np.arange(0, nTrials):
+        # for n in nb.prange(0, nTrials):
             # congruence
             isCongruent = False
-            if n < Variables.NTRIALS / 2:
+            if n < nTrials / 2:
                 isCongruent = True
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta*alpha/2 - (1-beta)*alpha/2
-            random.seed(iter)
-            iter += 1
-            print(shape)
-            print(characteristic_time)
-            print(peak_amplitude)
+            np.random.seed(n)
             while (evidence < alpha/2 and evidence > -alpha/2): # keep accumulating evidence until you reach a threshold
-                print("hello 2")
-                print(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)
-                evidence += DMC.calculateDelta(shape, characteristic_time, peak_amplitude, t, mu_c, isCongruent)*Variables.DT + random.choice(update_jitter)
-                t += Variables.DT # increment time by the unit dt
+                if not isCongruent:
+                    delta = (-peak_amplitude * np.exp(-(t / characteristic_time)) *
+                            np.power(((t * np.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / t) - (1 / characteristic_time))) + mu_c
+                else:
+                    delta = (peak_amplitude * np.exp(-(t / characteristic_time)) *
+                            np.power(((t * np.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / t) - (1 / characteristic_time))) + mu_c
+                evidence += delta*dt + np.random.choice(update_jitter)
+                t += dt # increment time by the unit dt
                 if evidence > alpha/2:
-                    choicelist.append(1) # choose the upper threshold action
-                    rtlist.append(t)
+                    # choicelist.append(1) # choose the upper threshold action
+                    # rtlist.append(t)
+                    choicelist[n] = 1
+                    rtlist[n] = t
                 elif evidence < -alpha/2:
-                    choicelist.append(0) # choose the lower threshold action
-                    rtlist.append(t)
+                    # choicelist.append(0) # choose the lower threshold action
+                    # rtlist.append(t)
+                    choicelist[n] = 0
+                    rtlist[n] = t
 
-        return (range(1, Variables.NTRIALS+1), choicelist, rtlist, congruence_list)
-    
-    
-    @staticmethod
-    def calculateDelta(shape, characteristic_time, peak_amplitude, automatic_time, mu_c, is_congruent):
-        if not is_congruent:
-            return (-peak_amplitude * math.exp(-(automatic_time / characteristic_time)) *
-            math.pow(((automatic_time * math.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / automatic_time) - (1 / characteristic_time))) + mu_c
-        return (peak_amplitude * math.exp(-(automatic_time / characteristic_time)) *
-        math.pow(((automatic_time * math.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / automatic_time) - (1 / characteristic_time))) + mu_c
-    
-    
+        return (np.arange(1, nTrials+1), choicelist, rtlist, congruence_list)
     

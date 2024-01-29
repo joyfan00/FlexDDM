@@ -8,12 +8,12 @@ class Variables:
     QUANTILES_CDF = [0.1, 0.3, 0.5, 0.7, 0.9]
     QUANTILES_CAF = [0.25, 0.5, 0.75]
 
-    DT = 0.001
+    DT = 0.01
     VAR = 0.1
-    NTRIALS = 8
+    NTRIALS = 100
     NOISESEED = 50
-    CORES = 4
-    BINS = 4
+    CORES = 3
+    BINS = 3
 
     def __init__(self) -> None:
         pass
