@@ -32,7 +32,7 @@ class SSP(Model):
         super().__init__(self.param_number, self.bounds, self.parameter_names)
     
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(self, alpha, beta, p, sd_0, sd_r, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
+    def model_simulation(alpha, beta, p, sd_0, sd_r, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
