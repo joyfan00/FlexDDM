@@ -27,11 +27,11 @@ class SSP(Model):
         Initializes a DSTP model object. 
         """
         self.data = getRTData()
-        self.bounds = [(0,1),(0,1),(0,1),(0,3),(0,1),(0,min(self.data['rt']))]
+        self.bounds = [(0,20),(0,1),(0,2),(0,10),(0,100),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation (alpha, beta, p, sd_0, sd_r, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
+    def model_simulation(alpha, beta, p, sd_0, sd_r, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
 
@@ -39,25 +39,24 @@ class SSP(Model):
         np.random.seed(noiseseed)
 
         noise = np.random.normal(loc=0, scale=.01, size=10000)
-        iter=0
         for n in np.arange(0, nTrials):
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta*alpha/2 - (1-beta)*alpha/2 # start our evidence at initial-bias beta
+            np.random.seed(n)
             while evidence < alpha/2 and evidence > -alpha/2: # keep accumulating evidence until you reach a threshold
                 sd = sd_0 - (sd_r * (t-tau))
                 if sd <= 0.001:
                     sd = 0.001
-                s_ta = np.sum(np.random.normal(0, sd, size=1000) <= 0.5) / 1000 - np.sum(np.random.normal(0, sd, size=1000) <= -0.5) / 1000
+                # s_ta = np.sum(np.random.normal(0, sd, size=1000) <= 0.5) / 1000 - np.sum(np.random.normal(0, sd, size=1000) <= -0.5) / 1000
                 # s_ta = np.random.normal(0, sd).cdf(.5) - np.random.normal(0, sd).cdf(-.5)
+                s_ta = ((1 + math.erf((.5 - 0) / sd / np.sqrt(2))) / 2) - ((1 + math.erf((-.5 - 0) / sd / np.sqrt(2))) / 2)
                 s_fl = 1 - s_ta
                 if congruencylist[n] == 'incongruent':
                     delta = s_ta*p - s_fl*p
                 else:
                     delta = s_ta*p + s_fl*p
-                np.random.seed(100+iter)
                 evidence += (delta*dt + np.random.choice(noise)) # add one of the many possible updates to evidence
                 t += dt # increment time by the unit dt
-                iter += 1
             if evidence > alpha/2:
                 choicelist[n] = 1 # choose the upper threshold action
             else:
