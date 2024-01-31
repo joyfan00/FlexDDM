@@ -11,24 +11,24 @@ import pandas as pd
 import sys
 
 """
-This class is a specific DSTP model class. 
+This class represents the standard drift diffusion model 
 """
 
 class standardDDM(Model):
 
-    param_number = 7
+    param_number = 4
     global bounds
     global data
-    parameter_names = ['alpha', 'beta', 'tau', 'shape', 'characteristic_time', 'peak_amplitude', 'mu_c']
+    parameter_names = ['alpha', 'beta', 'delta', 'tau']
     variables = Variables()
 
 
     def __init__(self):
         """
-        Initializes a DMC model object. 
+        Initializes a standard diffusion model object. 
         """
         self.data = getRTData()
-        self.bounds = [(0,10),(0,1),(1,20),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
+        self.bounds = [(0,10),(0,1),(1,20),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     # @staticmethod
