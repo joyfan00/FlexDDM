@@ -36,7 +36,7 @@ class StandardDDM(Model):
     def model_simulation (alpha, beta, delta, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
-        congruencylist = np.array(['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2))
+        congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
         np.random.seed(noiseseed)
         updates = np.random.normal(loc=0, scale=.01, size=10000)
         for n in np.arange(0, nTrials):

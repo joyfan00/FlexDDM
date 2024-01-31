@@ -1,7 +1,6 @@
 import json
 import pandas as pd
-# from variables import Variables
-from variables import Variables  # Import Variables where it's needed
+from variables import Variables 
 
 def getRTData():
     data = json.load(open(Variables.DATA_FILE))
