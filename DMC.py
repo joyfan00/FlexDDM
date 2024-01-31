@@ -19,7 +19,7 @@ class DMC (Model):
     param_number = 7
     global bounds
     global data
-    parameter_names = ['alpha', 'beta', 'tau', 'shape', 'characteristic_time', 'peak_amplitude', 'mu_c']
+    parameter_names = ['alpha', 'beta', 'mu_c', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
     variables = Variables()
 
 
@@ -28,12 +28,11 @@ class DMC (Model):
         Initializes a DMC model object. 
         """
         self.data = getRTData()
-        self.bounds = [(0,10),(0,1),(1,20),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
+        self.bounds = [(0,20),(0,1),(-1,1),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
-    # @staticmethod
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
+    def model_simulation(alpha, beta, mu_c, shape, characteristic_time, peak_amplitude, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 

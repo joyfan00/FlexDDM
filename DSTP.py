@@ -23,7 +23,7 @@ class DSTP(Model):
         Initializes a DSTP model object. 
         """
         self.data = getRTData()
-        self.bounds = [(0,10),(0,1),(0,1),(0,10),(0,1),(0,1),(0,1),(0,2),(0,min(self.data['rt']))]
+        self.bounds = [(0,20),(0,1),(-1,1),(0,20),(0,1),(-1,1),(-1,1),(-3,3),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
