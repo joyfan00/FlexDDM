@@ -14,7 +14,7 @@ import sys
 This class represents the standard drift diffusion model 
 """
 
-class standardDDM(Model):
+class StandardDDM(Model):
 
     param_number = 4
     global bounds
@@ -33,20 +33,21 @@ class standardDDM(Model):
 
     # @staticmethod
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation (alpha, beta, delta, tau, dt=0.001, var=.1, nTrials=5000):
+    def model_simulation (alpha, beta, delta, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
-
-        updates = np.random.normal(loc=delta*dt, scale=var, size=10000)
+        congruencylist = np.array(['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2))
+        np.random.seed(noiseseed)
+        updates = np.random.normal(loc=0, scale=.01, size=10000)
         for n in np.arange(0, nTrials):
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta # start our evidence at initial-bias beta
             while evidence < alpha and evidence > -alpha: # keep accumulating evidence until you reach a threshold
-                evidence += np.random.choice (updates) # add one of the many possible updates to evidence
+                evidence += np.random.choice(updates) # add one of the many possible updates to evidence
                 t += dt # increment time by the unit dt
             if evidence > alpha:
                 choicelist[n] = 1 # choose the upper threshold action
             else:
                 choicelist[n] = 0  # choose the lower threshold action
             rtlist[n] = t
-        return pd.DataFrame({'trial': range(1, nTrials+1), 'choice': choicelist, 'rt': rtlist})
+        return (np.arange(1, nTrials+1), choicelist, rtlist, congruencylist)
