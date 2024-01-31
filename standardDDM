@@ -33,7 +33,7 @@ class standardDDM(Model):
 
     # @staticmethod
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def standardDDM_sim (alpha, beta, delta, tau, dt=0.001, var=.1, nTrials=5000):
+    def model_simulation (alpha, beta, delta, tau, dt=0.001, var=.1, nTrials=5000):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
 
