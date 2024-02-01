@@ -22,6 +22,10 @@ class StandardDDM(Model):
     parameter_names = ['alpha_c', 'alpha_i', 'beta', 'delta_c', 'delta_i', 'tau']
     variables = Variables()
 
+    DT = 0.01
+    VAR = 0.1
+    NTRIALS = 100
+    NOISESEED = 50
 
     def __init__(self):
         """
@@ -33,7 +37,7 @@ class StandardDDM(Model):
 
     # @staticmethod
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation (alpha_c, alpha_i, beta, delta_c, delta_i, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
+    def model_simulation (alpha_c, alpha_i, beta, delta_c, delta_i, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
         congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 

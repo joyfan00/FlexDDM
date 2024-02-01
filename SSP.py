@@ -22,6 +22,11 @@ class SSP(Model):
     global data
     parameter_names = ['alpha', 'beta', 'p', 'sd_0', 'sd_r', 'tau']
     
+    DT = 0.01
+    VAR = 0.1
+    NTRIALS = 100
+    NOISESEED = 50
+
     def __init__(self):
         """
         Initializes a DSTP model object. 
@@ -31,7 +36,7 @@ class SSP(Model):
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alpha, beta, p, sd_0, sd_r, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
+    def model_simulation(alpha, beta, p, sd_0, sd_r, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
 

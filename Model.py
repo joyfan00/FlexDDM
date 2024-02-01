@@ -26,6 +26,13 @@ class Model:
     global cafs
     global parameter_names
 
+    global NTRIALS
+    NTRIALS = 100
+    global QUANTILES_CDF 
+    QUANTILES_CDF = [0.1, 0.3, 0.5, 0.7, 0.9]
+    global QUANTILES_CAF
+    QUANTILES_CAF = [0.25, 0.5, 0.75]
+
     def __init__(self, param_number, bounds, parameter_names):
         """
         Initializes a model object. 
@@ -81,7 +88,7 @@ class Model:
             print(printstring)
             print(convergence)
 
-        props = self.proportions(data, Variables.QUANTILES_CDF, Variables.QUANTILES_CAF)
+        props = self.proportions(data, QUANTILES_CDF, QUANTILES_CAF)
         bounds_var = self.bounds
         if run > 1:
             fit = minimize(Model.model_function, bounds=bounds_var, x0=params, args=(props,self.param_number,self.parameter_names,function, data, bounds_var), options={'maxiter': 1000},
@@ -153,18 +160,11 @@ class Model:
  
         values_list = list(parameters)
         values_tuple = tuple(values_list)
-        # jobs = [values_tuple]*Variables.BINS
         jobs = [values_tuple]*1
         
         for x in range(len(jobs)):
-            # jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/Variables.BINS)) + (x,)
-            jobs[x] = jobs[x] + (0.001, 0.01, int(Variables.NTRIALS/1)) + (x,)
+            jobs[x] = jobs[x] + (0.001, 0.01, int(NTRIALS/1)) + (x,)
 
-        
-        # with Pool(Variables.CORES) as pool:
-        #     for x in pool.istarmap(function, jobs):
-        #         results.append(x)
-            
         results.append(function(*parameters))
 
         acclist = [results[x][1] for x in range(len(jobs))]
@@ -257,10 +257,10 @@ class Model:
 
         for k, s in enumerate(subs):
             temp = data[data['id']==s]
-            cafs = np.quantile(temp['rt'], Variables.QUANTILES_CAF)
-            cdfslist.append(np.quantile(temp[temp['accuracy']==1]['rt'], Variables.QUANTILES_CDF))
-            cafcutofflist.append(np.quantile(temp['rt'], Variables.QUANTILES_CAF))
-            for i, q in enumerate(Variables.QUANTILES_CAF):
+            cafs = np.quantile(temp['rt'], QUANTILES_CAF)
+            cdfslist.append(np.quantile(temp[temp['accuracy']==1]['rt'], QUANTILES_CDF))
+            cafcutofflist.append(np.quantile(temp['rt'], QUANTILES_CAF))
+            for i, q in enumerate(QUANTILES_CAF):
                 if i == 0:
                     temp_q = temp[temp['rt'] <= cafs[i]]
                     meanrtlist.append([np.mean(temp_q['rt'])])

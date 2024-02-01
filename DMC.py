@@ -22,6 +22,10 @@ class DMC (Model):
     parameter_names = ['alpha', 'beta', 'mu_c', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
     variables = Variables()
 
+    DT = 0.01
+    VAR = 0.1
+    NTRIALS = 100
+    NOISESEED = 50
 
     def __init__(self):
         """
@@ -32,7 +36,7 @@ class DMC (Model):
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alpha, beta, mu_c, shape, characteristic_time, peak_amplitude, tau, dt=Variables.DT, var=Variables.VAR, nTrials=Variables.NTRIALS, noiseseed=Variables.NOISESEED):
+    def model_simulation(alpha, beta, mu_c, shape, characteristic_time, peak_amplitude, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DMC model.
         @parameters (dict): contains all variables and associated values for DMC models- 
