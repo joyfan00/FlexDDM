@@ -28,7 +28,7 @@ class DMC (Model):
         Initializes a DMC model object. 
         """
         self.data = getRTData()
-        self.bounds = [(0,20),(0,1),(-1,1),(1,10),(0.001,10),(0,1),(0,min(self.data['rt']))]
+        self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
