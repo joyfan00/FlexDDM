@@ -34,9 +34,13 @@ class DSTP(Model):
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS2, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
-        Performs simulations for DMC model.
-        @parameters (dict): contains all variables and associated values for DSTP models- 
-        keys include: alphaSS, betaSS, tauSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS2, tau
+        Performs simulations for DSTP model.
+        @alphaSS (float): threshold for stimulus selection
+        @betaSS (float): initial bias for stimulus selection
+        @deltaSS (float): drift rate for stimulus selection
+        @alphaRS (float): threshold for target selection
+        @betaRS1
+
         @dt (float): change in time 
         @var (float): variance
         @nTrials (int): number of trials

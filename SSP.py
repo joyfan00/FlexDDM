@@ -15,8 +15,7 @@ This class is a specific SSP model class.
 """
 
 class SSP(Model):
-    # different file that processes the flanker data 
-    # create documentation for what the csv, pkl, or json should look like before inputting 
+
     param_number = 6
     global bounds
     global data
@@ -37,9 +36,23 @@ class SSP(Model):
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alpha, beta, p, sd_0, sd_r, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
+        """
+        Performs simulations for SSP model.
+        @alpha (float): threshold
+        @beta (float): initial bias
+        @p (float):
+        @sd_0 (float):
+        @sd_r (float):
+        @tau (float): non-decision time
+        @dt (float): change in time 
+        @var (float): variance
+        @nTrials (int): number of trials
+        @noiseseed (int): random seed for noise consistency
+        """
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
 
+        # Creates congruency list with first half of trials being congruent and the following being incongruent
         congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
         np.random.seed(noiseseed)
 
@@ -52,8 +65,6 @@ class SSP(Model):
                 sd = sd_0 - (sd_r * (t-tau))
                 if sd <= 0.001:
                     sd = 0.001
-                # s_ta = np.sum(np.random.normal(0, sd, size=1000) <= 0.5) / 1000 - np.sum(np.random.normal(0, sd, size=1000) <= -0.5) / 1000
-                # s_ta = np.random.normal(0, sd).cdf(.5) - np.random.normal(0, sd).cdf(-.5)
                 s_ta = ((1 + math.erf((.5 - 0) / sd / np.sqrt(2))) / 2) - ((1 + math.erf((-.5 - 0) / sd / np.sqrt(2))) / 2)
                 s_fl = 1 - s_ta
                 if congruencylist[n] == 'incongruent':

@@ -39,8 +39,13 @@ class DMC (Model):
     def model_simulation(alpha, beta, mu_c, shape, characteristic_time, peak_amplitude, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DMC model.
-        @parameters (dict): contains all variables and associated values for DMC models- 
-        keys include: alpha, beta, tau, shape, characteristic_time, peak_amplitude, mu_c
+        @alpha (float): threshold
+        @beta (float): initial bias
+        @mu_c (float):
+        @shape (float):
+        @characteristic_time (float):
+        @peak_amplitude (float):
+        @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance
         @nTrials (int): number of trials
@@ -49,19 +54,13 @@ class DMC (Model):
 
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
-        # choicelist = []
-        # rtlist = []
         np.random.seed(noiseseed)
         update_jitter = np.random.normal(loc=0, scale=var, size=10000)
 
-        ### Add congruent list (make first half congruent)
-        # it assumes an even number of trials within each job -> make better 
-        # randomly decide the last element to be congruent or incongruent 
+        # Creates congruency list with first half of trials being congruent and the following being incongruent
         congruence_list = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)
 
         for n in np.arange(0, nTrials):
-        # for n in nb.prange(0, nTrials):
-            # congruence
             isCongruent = False
             if n < nTrials / 2:
                 isCongruent = True
@@ -78,13 +77,9 @@ class DMC (Model):
                 evidence += delta*dt + np.random.choice(update_jitter)
                 t += dt # increment time by the unit dt
                 if evidence > alpha/2:
-                    # choicelist.append(1) # choose the upper threshold action
-                    # rtlist.append(t)
                     choicelist[n] = 1
                     rtlist[n] = t
                 elif evidence < -alpha/2:
-                    # choicelist.append(0) # choose the lower threshold action
-                    # rtlist.append(t)
                     choicelist[n] = 0
                     rtlist[n] = t
 
