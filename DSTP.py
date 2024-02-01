@@ -51,7 +51,6 @@ class DSTP(Model):
         congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
         #deltaRS2 is always positive. Later in the model, you should either keep it positive
         ##### if the target bound is selected by SS, or multiply it by -1 if the flanker bound is selected by SS.
-        iter = 0
         for n in np.arange(0, nTrials):
             # Assuming first half of trials are congruent
             if congruencylist[n] == 'congruent':
@@ -61,12 +60,11 @@ class DSTP(Model):
             t = tau # start the accumulation process at non-decision time tau
             evidenceSS = betaSS*alphaSS/2 - (1-betaSS)*alphaSS/2 # start our evidence at initial-bias beta (Kyle: I modified this so beta is always between 0 and 1, and alpha is the total distance between bounds)
             evidenceRS1 = betaRS1*alphaRS/2 - (1-betaRS1)*alphaRS/2
+            np.random.seed(n)
             while (evidenceSS < alphaSS/2 and evidenceSS > -alphaSS/2) or (evidenceRS1 < alphaRS/2 and evidenceRS1 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
-                np.random.seed(100 + iter)
                 evidenceSS += deltaSS*dt + np.random.choice(update_jitter) # add one of the many possible updates to evidence
                 evidenceRS1 += deltaRS1*dt + np.random.choice(update_jitter)
                 t += dt # increment time by the unit dt
-                iter += 1
             if evidenceRS1 > alphaRS/2:
                 choicelist[n] = 1 # choose the upper threshold action
                 rtlist[n] = t
