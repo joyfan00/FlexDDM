@@ -29,7 +29,7 @@ class SSP(Model):
 
     def __init__(self):
         """
-        Initializes a DSTP model object. 
+        Initializes a SSP model object. 
         """
         self.data = getRTData()
         self.bounds = [(0,20),(0,1),(0,2),(0,10),(0,100),(0,min(self.data['rt']))]
