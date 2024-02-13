@@ -3,8 +3,8 @@ import numpy as np
 import random
 import pandas as pd
 import numba as nb
-from models.file_input import *
-from models.Model import Model
+from .file_input import *
+from .Model import Model
 
 """
 This class is a specific DSTP model class. 

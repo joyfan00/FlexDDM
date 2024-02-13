@@ -4,8 +4,8 @@ import numpy as np
 import random
 import math
 import numba as nb
-from models.Model import Model
-from models.file_input import *
+from .Model import Model
+from .file_input import *
 import pandas as pd
 import sys
 
