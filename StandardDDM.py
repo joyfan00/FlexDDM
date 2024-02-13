@@ -62,3 +62,8 @@ class StandardDDM(Model):
                 choicelist[n] = 0  # choose the lower threshold action
             rtlist[n] = t
         return (np.arange(1, nTrials+1), choicelist, rtlist, congruencylist)
+congruencylist = 0
+
+
+
+
