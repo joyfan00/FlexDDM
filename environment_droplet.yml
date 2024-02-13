@@ -1,4 +1,0 @@
-name: simulationenv
-channels:
-  - defaults
-prefix: C:\Users\joyfa\anaconda3\envs\simulationenv

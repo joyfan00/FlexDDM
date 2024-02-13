@@ -1,7 +1,6 @@
 # packages 
-from Model import Model
-from variables import Variables
-from file_input import *
+from models.Model import Model
+from models.file_input import *
 # import pandas as pd
 import numba as nb
 import numpy as np

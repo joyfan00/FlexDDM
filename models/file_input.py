@@ -1,8 +1,7 @@
 import json
 import pandas as pd
-from variables import Variables 
 
-DATA_FILE = 'sample.json'
+DATA_FILE = 'models/sample.json'
 
 def getRTData():
     data = json.load(open(DATA_FILE))

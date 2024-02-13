@@ -3,9 +3,8 @@ import numpy as np
 import random
 import pandas as pd
 import numba as nb
-from file_input import *
-from Model import Model
-from variables import Variables
+from models.file_input import *
+from models.Model import Model
 
 """
 This class is a specific DSTP model class. 
@@ -89,6 +88,7 @@ class DSTP(Model):
                     deltaRS2 = -1 * deltaRS2
                 evidenceRS2 = evidenceRS1 # start where you left off from RS1
                 ## We weren't sure if the decision threshold is the same across both response selection phases
+                iter = 0
                 while (evidenceRS2 < alphaRS/2 and evidenceRS2 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
                     np.random.seed(100 + iter)
                     evidenceRS2 += deltaRS2*dt + np.random.choice(update_jitter)
@@ -102,3 +102,6 @@ class DSTP(Model):
                     rtlist[n] = t
         return (np.arange(1, nTrials+1), choicelist, rtlist, congruencylist)
     
+
+
+

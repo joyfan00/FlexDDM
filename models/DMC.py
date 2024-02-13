@@ -4,9 +4,8 @@ import numpy as np
 import random
 import math
 import numba as nb
-from Model import Model
-from file_input import *
-from variables import Variables
+from models.Model import Model
+from models.file_input import *
 import pandas as pd
 import sys
 
@@ -20,7 +19,6 @@ class DMC (Model):
     global bounds
     global data
     parameter_names = ['alpha', 'beta', 'mu_c', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
-    variables = Variables()
 
     DT = 0.01
     VAR = 0.1

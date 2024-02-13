@@ -4,7 +4,6 @@ import numpy as np
 import sys
 import math
 from multiprocessing.pool import Pool
-from variables import Variables
 from scipy.optimize import minimize
 from scipy.optimize import differential_evolution
 import math
