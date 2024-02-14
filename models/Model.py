@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import sys
 import math
-from multiprocessing.pool import Pool
 from scipy.optimize import minimize
 from scipy.optimize import differential_evolution
 import math
@@ -52,33 +51,6 @@ class Model:
         data = pd.DataFrame({'id': data[id], 'congruency': data[congruency],'rt': [x/1000 for x in data[rt]], 'accuracy': data[accuracy]})
         data['congruency'] = ['congruent' if x == 1 else 'incongruent' for x in data['congruency']]
         return data
-
-
-    def istarmap(self, func, iterable, chunksize=1):
-        """
-        Runs a specific function using a set of arguments. Uses them across different threads. Is the starmap-version of imap.
-
-        @func: the function being applied to the arguments 
-        @iterable: the arguments for the function 
-        @chunksize: 
-        """
-
-        self._check_running()
-        if chunksize < 1:
-            raise ValueError(
-                "Chunksize must be 1+, not {0:n}".format(
-                    chunksize))
-
-        task_batches = mpp.Pool._get_tasks(func, iterable, chunksize)
-        result = mpp.IMapIterator(self)
-        self._taskqueue.put(
-            (
-                self._guarded_task_generation(result._job,
-                                            mpp.starmapstar,
-                                            task_batches),
-                result._set_length
-            ))
-        return (item for chunk in result for item in chunk)
 
     def fit(self, function, data, params, run=1):
         """
@@ -364,10 +336,6 @@ class Model:
                 print(", ".join(str(x) for x in pars))
                 print(" X^2 = %s" % fitstat)
                 runint += 1
-            # pars, fitstat = self.fit(function, self.data[self.data['id']==s], pars, run=runint)
-            # print(", ".join(str(x) for x in pars))
-            # print(" X^2 = %s" % fitstat)
-
             quantiles_caf = [0.25, 0.5, 0.75]
             quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
             myprops = self.proportions(self.data[self.data['id']==s], quantiles_cdf, quantiles_caf)

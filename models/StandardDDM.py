@@ -1,12 +1,7 @@
 # packages 
-# import pandas as pd
 import numpy as np
-import random
-import math
 import numba as nb
 from .Model import Model
-import pandas as pd
-import sys
 
 """
 This class represents the standard drift diffusion model 

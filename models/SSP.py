@@ -1,12 +1,8 @@
 # packages 
-from models.Model import Model
-# import pandas as pd
+from .Model import Model
 import numba as nb
 import numpy as np
 import math
-import random
-from scipy.stats import norm
-# from file_input import *
 
 """
 This class is a specific SSP model class. 
