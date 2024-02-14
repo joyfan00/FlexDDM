@@ -5,7 +5,7 @@ import numba as nb
 from .Model import Model
 
 """
-This class is a specific DSTP model class. 
+Class to simulate data according to the Dual Stage Two Phase (DSTP) 
 """
 
 class DSTP(Model):
@@ -14,7 +14,6 @@ class DSTP(Model):
     param_number = 9
     global bounds
     parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS1', 'delta_target', 'delta_flanker', 'deltaRS2', 'tau']
-    
     DT = 0.01
     VAR = 0.1
     NTRIALS = 100
@@ -32,33 +31,26 @@ class DSTP(Model):
     def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS2, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DSTP model.
-        @alphaSS (float): threshold for stimulus selection
-        @betaSS (float): initial bias for stimulus selection
-        @deltaSS (float): drift rate for stimulus selection
-        @alphaRS (float): threshold for target selection
-        @betaRS1
-
+        @alphaSS (float): boundary separation for stimulus selection
+        @betaSS (float): initial bias for stimulus selection phase
+        @deltaSS (float): drift rate for stimulus selection phase
+        @alphaRS (float): boundary separation for response selection phase
+        @betaRS1: 
+        @delta_target: 
+        @delta_flanker
+        @deltaRS2:
+        @tau
         @dt (float): change in time 
         @var (float): variance
         @nTrials (int): number of trials
         @noiseseed (int): random seed for noise consistency
         """
-
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
-        # sample a bunch of possible updates to evidence with each unit of time dt. Updates are centered
-        # around drift rate delta (scaled to the units of time), with variance var (because updates are noisy)
-
         np.random.seed(noiseseed)
         update_jitter = np.random.normal(loc=0, scale=var, size=10000)
-
-        # updatesRS1 = np.random.normal(loc=deltaRS1*dt, scale=var, size=10000)
-        ### Add congruent list (make first half congruent)
         congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
-        #deltaRS2 is always positive. Later in the model, you should either keep it positive
-        ##### if the target bound is selected by SS, or multiply it by -1 if the flanker bound is selected by SS.
         for n in np.arange(0, nTrials):
-            # Assuming first half of trials are congruent
             if congruencylist[n] == 'congruent':
                 deltaRS1 = delta_target + delta_flanker
             else:
@@ -78,14 +70,13 @@ class DSTP(Model):
                 choicelist[n] = 0 # choose the lower threshold action
                 rtlist[n] = t
 
-            # If SS completes before RS1, begin RS2 from where RS1 left off (but update drift rate/other params)
+            # If Stimulus Selection (SS) completes before Response Selection 1 (RS1), begin Response Selection 2 (RS2) from where RS1 left off 
             else:
                 if evidenceSS > alphaSS/2:
                     deltaRS2 = abs(deltaRS2)
                 elif evidenceSS < -alphaSS/2:
                     deltaRS2 = -1 * deltaRS2
                 evidenceRS2 = evidenceRS1 # start where you left off from RS1
-                ## We weren't sure if the decision threshold is the same across both response selection phases
                 iter = 0
                 while (evidenceRS2 < alphaRS/2 and evidenceRS2 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
                     np.random.seed(100 + iter)

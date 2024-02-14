@@ -5,7 +5,7 @@ import numpy as np
 import math
 
 """
-This class is a specific SSP model class. 
+Class to simulate data according to the Shrinking Spotlight Model (SSP) 
 """
 
 class SSP(Model):
@@ -32,11 +32,11 @@ class SSP(Model):
     def model_simulation(alpha, beta, p, sd_0, sd_r, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for SSP model.
-        @alpha (float): threshold
+        @alpha (float): boundary separation
         @beta (float): initial bias
-        @p (float):
-        @sd_0 (float):
-        @sd_r (float):
+        @p (float): perceptual input of the stimulus
+        @sd_0 (float): standard deviation of the Gaussian distribution
+        @sd_r (float):attentional shrinking rate
         @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance
@@ -66,7 +66,7 @@ class SSP(Model):
                 else:
                     delta = s_ta*p + s_fl*p
                 evidence += (delta*dt + np.random.choice(noise)) # add one of the many possible updates to evidence
-                t += dt # increment time by the unit dt
+                t += dt 
             if evidence > alpha/2:
                 choicelist[n] = 1 # choose the upper threshold action
             else:

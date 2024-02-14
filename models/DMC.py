@@ -4,7 +4,7 @@ import numba as nb
 from .Model import Model
 
 """
-This class is a specific DSTP model class. 
+Class to simulate data according to the Diffusion Model for Conlict (DMC) 
 """
 
 class DMC (Model):
@@ -30,13 +30,13 @@ class DMC (Model):
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alpha, beta, mu_c, shape, characteristic_time, peak_amplitude, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
-        Performs simulations for DMC model.
-        @alpha (float): threshold
+        Performs simulations for DMC model. 
+        @alpha (float): boundary separation
         @beta (float): initial bias
-        @mu_c (float):
-        @shape (float):
-        @characteristic_time (float):
-        @peak_amplitude (float):
+        @mu_c (float): drift rate 
+        @shape (float): shape parameter of gamma distribution function used to model the time-course of automatic activation 
+        @characteristic_time (float)://////////// (also check shape definition)
+        @peak_amplitude (float):////////////////
         @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance
