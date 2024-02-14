@@ -5,7 +5,6 @@ import random
 import math
 import numba as nb
 from .Model import Model
-from .file_input import *
 import pandas as pd
 import sys
 
@@ -25,11 +24,11 @@ class DMC (Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self):
+    def __init__(self, path="S1FlankerData.csv"):
         """
         Initializes a DMC model object. 
         """
-        self.data = getRTData()
+        self.data = self.getRTData(path)
         self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 

@@ -1,6 +1,5 @@
 # packages 
 from models.Model import Model
-from models.file_input import *
 # import pandas as pd
 import numba as nb
 import numpy as np
@@ -25,11 +24,11 @@ class SSP(Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self):
+    def __init__(self, path="S1FlankerData.csv"):
         """
         Initializes a SSP model object. 
         """
-        self.data = getRTData()
+        self.data = self.getRTData(path)
         self.bounds = [(0,20),(0,1),(0,2),(0,10),(0,100),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 

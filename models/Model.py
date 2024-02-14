@@ -42,6 +42,18 @@ class Model:
         self.bounds = bounds
         self.parameter_names = parameter_names
 
+    def getRTData(self, path="S1FlankerData.csv", id="PPT", congruency="Condition", rt="RT", accuracy="Correct"):
+        """
+        Gets the reaction time data from file. 
+
+        @path: the path to the data 
+        """
+        data = pd.read_csv(path)
+        data = pd.DataFrame({'id': data[id], 'congruency': data[congruency],'rt': [x/1000 for x in data[rt]], 'accuracy': data[accuracy]})
+        data['congruency'] = ['congruent' if x == 1 else 'incongruent' for x in data['congruency']]
+        return data
+
+
     def istarmap(self, func, iterable, chunksize=1):
         """
         Runs a specific function using a set of arguments. Uses them across different threads. Is the starmap-version of imap.
@@ -339,7 +351,6 @@ class Model:
     
     def runSimulations(self, inits, startingParticipants, endingParticipants, function, fileName='output.csv'):
         df = pd.DataFrame(columns=self.parameter_names + ['X^2', 'bic'])
-
         for s in range(startingParticipants, endingParticipants):
             print("PARTICIPANT " + str(s))
             fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
