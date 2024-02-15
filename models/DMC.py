@@ -35,8 +35,8 @@ class DMC (Model):
         @beta (float): initial bias
         @mu_c (float): drift rate 
         @shape (float): shape parameter of gamma distribution function used to model the time-course of automatic activation 
-        @characteristic_time (float)://////////// (also check shape definition)
-        @peak_amplitude (float):////////////////
+        @characteristic_time (float)://////////// 
+        @peak_amplitude (float): amplitude of automatic activation
         @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance

@@ -5,7 +5,7 @@ import numba as nb
 from .Model import Model
 
 """
-Class to simulate data according to the Dual Stage Two Phase (DSTP) 
+Class to simulate data according to the Dual Stage Two Phase model (DSTP) 
 """
 
 class DSTP(Model):
