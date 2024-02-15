@@ -36,7 +36,7 @@ class SSP(Model):
         @beta (float): initial bias
         @p (float): perceptual input of the stimulus
         @sd_0 (float): standard deviation of the Gaussian distribution
-        @sd_r (float):attentional shrinking rate
+        @sd_r (float): attentional shrinking rate
         @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance

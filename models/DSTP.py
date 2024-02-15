@@ -13,7 +13,7 @@ class DSTP(Model):
     data = pd.DataFrame()
     param_number = 9
     global bounds
-    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS1', 'delta_target', 'delta_flanker', 'deltaRS2', 'tau']
+    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS1', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
     DT = 0.01
     VAR = 0.1
     NTRIALS = 100
@@ -28,18 +28,18 @@ class DSTP(Model):
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS2, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
+    def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DSTP model.
-        @alphaSS (float): boundary separation for stimulus selection
+        @alphaSS (float): boundary separation for stimulus selection phase
         @betaSS (float): initial bias for stimulus selection phase
         @deltaSS (float): drift rate for stimulus selection phase
-        @alphaRS (float): boundary separation for response selection phase
-        @betaRS1: 
-        @delta_target: 
-        @delta_flanker
-        @deltaRS2:
-        @tau
+        @alphaRS (float): boundary separation for response selection phase 
+        @betaRS1 (float): inital bias for response selection phase (before stimulus is selected)
+        @delta_target (float): drift rate for target arrow during response selection BEFORE stimulus is selected 
+        @delta_flanker (float): drift rate for flanker arrows during response selection BEFORE stimulus is selected
+        @deltaRS (float): drift rate for the reponse selection phase after a stimulus (either flanker or target) has been selected
+        @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance
         @nTrials (int): number of trials
@@ -73,14 +73,14 @@ class DSTP(Model):
             # If Stimulus Selection (SS) completes before Response Selection 1 (RS1), begin Response Selection 2 (RS2) from where RS1 left off 
             else:
                 if evidenceSS > alphaSS/2:
-                    deltaRS2 = abs(deltaRS2)
+                    deltaRS = abs(deltaRS)
                 elif evidenceSS < -alphaSS/2:
-                    deltaRS2 = -1 * deltaRS2
+                    deltaRS = -1 * deltaRS
                 evidenceRS2 = evidenceRS1 # start where you left off from RS1
                 iter = 0
                 while (evidenceRS2 < alphaRS/2 and evidenceRS2 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
                     np.random.seed(100 + iter)
-                    evidenceRS2 += deltaRS2*dt + np.random.choice(update_jitter)
+                    evidenceRS2 += deltaRS*dt + np.random.choice(update_jitter)
                     t += dt # increment time by the unit dt
                     iter += 1
                 if evidenceRS2 > alphaRS/2:

@@ -32,11 +32,16 @@ class StandardDDM(Model):
     def model_simulation (alpha_c, alpha_i, beta, delta_c, delta_i, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for standard diffusion model.
-        @alpha_c: boundary separation for congruent trials
-        @alpha_i: boundary separation for incongruent trials 
-        @beta: initial bias
-        @delta_c: drift rate for incongruent trials
-        @delta_i: drift rate for incongruent trials
+        @alpha_c (float): boundary separation for congruent trials
+        @alpha_i (float): boundary separation for incongruent trials 
+        @beta (float): initial bias
+        @delta_c (float): drift rate for incongruent trials
+        @delta_i (float): drift rate for incongruent trials
+        @tau (float): non-decision time
+        @dt (float): change in time 
+        @var (float): variance
+        @nTrials (int): number of trials
+        @noiseseed (int): random seed for noise consistency
         """
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
