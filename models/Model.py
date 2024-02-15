@@ -6,7 +6,6 @@ import math
 from scipy.optimize import minimize
 from scipy.optimize import differential_evolution
 import math
-import multiprocessing.pool as mpp
 import sys
 import warnings
 warnings.filterwarnings("ignore")

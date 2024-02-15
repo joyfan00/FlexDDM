@@ -33,9 +33,9 @@ class DMC (Model):
         Performs simulations for DMC model. 
         @alpha (float): boundary separation
         @beta (float): initial bias
-        @mu_c (float): drift rate 
+        @mu_c (float): drift rate of the controlled process
         @shape (float): shape parameter of gamma distribution function used to model the time-course of automatic activation 
-        @characteristic_time (float)://////////// 
+        @characteristic_time (float): duration of the automatic process
         @peak_amplitude (float): amplitude of automatic activation
         @tau (float): non-decision time
         @dt (float): change in time 

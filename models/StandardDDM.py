@@ -4,7 +4,7 @@ import numba as nb
 from .Model import Model
 
 """
-Class to simulate data according to the standard drift diffusion model  
+Class to simulate data according to the standard flanker drift diffusion model  
 """
 
 class StandardDDM(Model):
@@ -31,7 +31,7 @@ class StandardDDM(Model):
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation (alpha_c, alpha_i, beta, delta_c, delta_i, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
-        Performs simulations for standard diffusion model.
+        Performs simulations for standard flanker diffusion model.
         @alpha_c (float): boundary separation for congruent trials
         @alpha_i (float): boundary separation for incongruent trials 
         @beta (float): initial bias

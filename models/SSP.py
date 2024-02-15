@@ -35,8 +35,8 @@ class SSP(Model):
         @alpha (float): boundary separation
         @beta (float): initial bias
         @p (float): perceptual input of the stimulus
-        @sd_0 (float): standard deviation of the Gaussian distribution
-        @sd_r (float): attentional shrinking rate
+        @sd_0 (float): initial standard deviation of the Gaussian distribution describing the attentional spotlight 
+        @sd_r (float): shrinking rate of the standard deviation of the Guassian distribution describing the attentional spotlight
         @tau (float): non-decision time
         @dt (float): change in time 
         @var (float): variance

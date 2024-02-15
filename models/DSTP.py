@@ -13,7 +13,7 @@ class DSTP(Model):
     data = pd.DataFrame()
     param_number = 9
     global bounds
-    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS1', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
+    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
     DT = 0.01
     VAR = 0.1
     NTRIALS = 100
@@ -28,14 +28,14 @@ class DSTP(Model):
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS1, delta_target, delta_flanker, deltaRS, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
+    def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS, delta_target, delta_flanker, deltaRS, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DSTP model.
         @alphaSS (float): boundary separation for stimulus selection phase
         @betaSS (float): initial bias for stimulus selection phase
         @deltaSS (float): drift rate for stimulus selection phase
         @alphaRS (float): boundary separation for response selection phase 
-        @betaRS1 (float): inital bias for response selection phase (before stimulus is selected)
+        @betaRS (float): inital bias for response selection phase 
         @delta_target (float): drift rate for target arrow during response selection BEFORE stimulus is selected 
         @delta_flanker (float): drift rate for flanker arrows during response selection BEFORE stimulus is selected
         @deltaRS (float): drift rate for the reponse selection phase after a stimulus (either flanker or target) has been selected
@@ -57,7 +57,7 @@ class DSTP(Model):
                 deltaRS1 = delta_target - delta_flanker
             t = tau # start the accumulation process at non-decision time tau
             evidenceSS = betaSS*alphaSS/2 - (1-betaSS)*alphaSS/2 # start our evidence at initial-bias beta (Kyle: I modified this so beta is always between 0 and 1, and alpha is the total distance between bounds)
-            evidenceRS1 = betaRS1*alphaRS/2 - (1-betaRS1)*alphaRS/2
+            evidenceRS1 = betaRS*alphaRS/2 - (1-betaRS)*alphaRS/2
             np.random.seed(n)
             while (evidenceSS < alphaSS/2 and evidenceSS > -alphaSS/2) or (evidenceRS1 < alphaRS/2 and evidenceRS1 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
                 evidenceSS += deltaSS*dt + np.random.choice(update_jitter) # add one of the many possible updates to evidence
