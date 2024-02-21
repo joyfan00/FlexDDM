@@ -9,6 +9,7 @@ Class to simulate data according to the Dual Stage Two Phase model (DSTP)
 """
 
 class DSTP(Model):
+   # modelsimulationfunction = staticmethod(model_simulation)
 
     data = pd.DataFrame()
     param_number = 9

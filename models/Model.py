@@ -320,28 +320,7 @@ class Model:
             props_caf.append(0)
         return props_cdf, props_caf
     
-    def runSimulations(self, startingParticipants, endingParticipants, function, fileName='output.csv'):
-        df = pd.DataFrame(columns=self.parameter_names + ['X^2', 'bic'])
-        for s in range(startingParticipants, endingParticipants):
-            print("PARTICIPANT " + str(s))
-            fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
-            pars = None
-            runint=1
-            while fitstat != fitstat2:
-                print('run %s' % runint)
-                fitstat2 = fitstat
-                print(runint)
-                pars, fitstat = self.fit(function, self.data[self.data['id']==s], pars, run=runint)
-                print(", ".join(str(x) for x in pars))
-                print(" X^2 = %s" % fitstat)
-                runint += 1
-            quantiles_caf = [0.25, 0.5, 0.75]
-            quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
-            myprops = self.proportions(self.data[self.data['id']==s], quantiles_cdf, quantiles_caf)
-            print(myprops)
-            bic = Model.model_function(pars, myprops, self.param_number, self.parameter_names, function, self.data[self.data['id']==s], self.bounds, final=True)
-            df.loc[len(df)] = list(pars) + [fitstat, bic]
-        df.to_csv(fileName, index=False)
+
 
 
 

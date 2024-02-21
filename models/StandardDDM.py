@@ -8,7 +8,6 @@ Class to simulate data according to the standard flanker drift diffusion model
 """
 
 class StandardDDM(Model):
-
     param_number = 6
     global bounds
     global data
