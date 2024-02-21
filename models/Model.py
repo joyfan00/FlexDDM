@@ -320,12 +320,12 @@ class Model:
             props_caf.append(0)
         return props_cdf, props_caf
     
-    def runSimulations(self, inits, startingParticipants, endingParticipants, function, fileName='output.csv'):
+    def runSimulations(self, startingParticipants, endingParticipants, function, fileName='output.csv'):
         df = pd.DataFrame(columns=self.parameter_names + ['X^2', 'bic'])
         for s in range(startingParticipants, endingParticipants):
             print("PARTICIPANT " + str(s))
             fitstat = sys.maxsize-1; fitstat2 = sys.maxsize
-            pars = inits
+            pars = None
             runint=1
             while fitstat != fitstat2:
                 print('run %s' % runint)
