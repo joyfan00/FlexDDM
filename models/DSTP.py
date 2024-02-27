@@ -9,7 +9,6 @@ Class to simulate data according to the Dual Stage Two Phase model (DSTP)
 """
 
 class DSTP(Model):
-   # modelsimulationfunction = staticmethod(model_simulation)
 
     data = pd.DataFrame()
     param_number = 9
@@ -24,6 +23,8 @@ class DSTP(Model):
         """
         Initializes a DSTP model object. 
         """
+        self.modelsimulationfunction = DSTP.model_simulation
+
         self.data = self.getRTData(path)
         self.bounds = [(0,20),(0,1),(-1,1),(0,20),(0,1),(-1,1),(-1,1),(-3,3),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)
@@ -92,6 +93,7 @@ class DSTP(Model):
                     rtlist[n] = t
         return (np.arange(1, nTrials+1), choicelist, rtlist, congruencylist)
     
+
 
 
 

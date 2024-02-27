@@ -22,6 +22,7 @@ class StandardDDM(Model):
         """
         Initializes a standard diffusion model object. 
         """
+        self.modelsimulationfunction = StandardDDM.model_simulation
         self.data = self.getRTData(path)
         self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,min(self.data['rt']))]
         super().__init__(self.param_number, self.bounds, self.parameter_names)

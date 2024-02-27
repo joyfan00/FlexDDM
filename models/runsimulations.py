@@ -24,4 +24,4 @@ def runSimulations(models, startingParticipants, endingParticipants, fileName='o
             print(myprops)
             bic = Model.model_function(pars, myprops, model.param_number, model.parameter_names, model.modelsimulationfunction, model.data[model.data['id']==s], model.bounds, final=True)
             df.loc[len(df)] = list(pars) + [fitstat, bic]
-        df.to_csv(str(model) + fileName, index=False)
+        df.to_csv(model.__class__.__name__ + '_' + fileName, index=False)
