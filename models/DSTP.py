@@ -47,6 +47,7 @@ class DSTP(Model):
         @nTrials (int): number of trials
         @noiseseed (int): random seed for noise consistency
         """
+
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
         np.random.seed(noiseseed)
