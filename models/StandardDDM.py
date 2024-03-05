@@ -18,13 +18,20 @@ class StandardDDM(Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self, path="S1FlankerData.csv"):
+    def __init__(self, data=None):
         """
         Initializes a standard diffusion model object. 
         """
         self.modelsimulationfunction = StandardDDM.model_simulation
-        self.data = self.getRTData(path)
-        self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,min(self.data['rt']))]
+        if data != None:
+            if isinstance(data, str): 
+                self.data = self.getRTData(data)
+            else:
+                self.data = data
+            self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,min(self.data['rt']))]
+        else: 
+            self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,5)]
+        
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     # @staticmethod

@@ -19,13 +19,17 @@ class DMC (Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self, path=None):
+    def __init__(self, data=None):
         """
         Initializes a DMC model object. 
         """
         self.modelsimulationfunction = DMC.model_simulation
 
-        if path != None:
+        if data != None:
+            if isinstance(data, str): 
+                self.data = self.getRTData(data)
+            else:
+                self.data = data
             self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),min(self.data['rt']))]
         else: 
             self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),5)]

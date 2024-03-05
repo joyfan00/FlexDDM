@@ -10,7 +10,7 @@ Class to simulate data according to the Dual Stage Two Phase model (DSTP)
 
 class DSTP(Model):
 
-    data = pd.DataFrame()
+    global data
     param_number = 9
     global bounds
     parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
@@ -19,14 +19,21 @@ class DSTP(Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self, path="S1FlankerData.csv"):
+    def __init__(self, data=None):
         """
         Initializes a DSTP model object. 
         """
         self.modelsimulationfunction = DSTP.model_simulation
 
-        self.data = self.getRTData(path)
-        self.bounds = [(0,20),(0,1),(-1,1),(0,20),(0,1),(-1,1),(-1,1),(-3,3),(0,min(self.data['rt']))]
+        if data != None:
+            if isinstance(data, str): 
+                self.data = self.getRTData(data)
+            else:
+                self.data = data
+            self.bounds = [(0,20),(0,1),(-1,1),(0,20),(0,1),(-1,1),(-1,1),(-3,3),(0,min(self.data['rt']))]
+        else: 
+            self.bounds = [(0,20),(0,1),(-1,1),(0,20),(0,1),(-1,1),(-1,1),(-3,3),(0,5)]
+            
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
