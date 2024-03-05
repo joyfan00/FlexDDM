@@ -12,7 +12,7 @@ def model_recovery(simulation_model, comparing_models):
 
     data = simulation_model.modelsimulationfunction(*initial_params)
     
-    runsimulations.run_simulations(comparing_models.append(simulation_model))
+    listofmodels = comparing_models.append(simulation_model)
+    runsimulations.run_simulations(listofmodels)
 
-    print(comparing_models.append(simulation_model))
    #runsimulations(comparing_models, data)

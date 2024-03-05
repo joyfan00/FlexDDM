@@ -19,13 +19,19 @@ class DMC (Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self, path="S1FlankerData.csv"):
+    def __init__(self, path=None):
         """
         Initializes a DMC model object. 
         """
         self.modelsimulationfunction = DMC.model_simulation
-        self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),min(self.data['rt']))]
+
+        if path != None:
+            self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),min(self.data['rt']))]
+        else: 
+            self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),5)]
+
         super().__init__(self.param_number, self.bounds, self.parameter_names)
+
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alpha, beta, mu_c, shape, characteristic_time, peak_amplitude, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED,):
@@ -76,4 +82,5 @@ class DMC (Model):
                     rtlist[n] = t
 
         return (np.arange(1, nTrials+1), choicelist, rtlist, congruence_list)
+    
     
