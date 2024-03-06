@@ -28,6 +28,7 @@ def run_simulations(models, startingParticipants, endingParticipants, input_data
             df.loc[len(df)] = [id] + list(pars) + [fitstat, bic]
         if return_dataframes:
             dflist.append(df)
+            df.to_csv(model.__class__.__name__ + '_' + fileName, index=False)
         else:
             df.to_csv(model.__class__.__name__ + '_' + fileName, index=False)
     if return_dataframes:

@@ -7,32 +7,37 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+def convertToDF(tuple_data):
+    return pd.DataFrame({
+        'id': [1] * 100,
+        'Trial': tuple_data[0],
+        'Choice': tuple_data[1],
+        'ReactionTime': tuple_data[2],
+        'Congruence': tuple_data[3]
+    })
 
 def model_recovery(models):
     dfs_list = []
+    counter = 0
     for model in models:
+        counter+=1
         initial_params = []
         for lower_bound, upper_bound in model.bounds:
             initial_params.append(np.random.uniform(lower_bound, upper_bound))
 
-        simulation_data = model.modelsimulationfunction(*initial_params)
-        ## create helper to convert the simulation_data to a dataframe
-
-        print(type(simulation_data))
-        print(simulation_data)
-
-        # for model in models:
-        #     model.data = simulation_data
-
-        dfs_list.append(runsimulations.run_simulations(models, 1, simulation_data['id'].astype('int').max(), simulation_data, return_dataframes = True))
+        simulation_data = convertToDF(model.modelsimulationfunction(*initial_params))
+        simulation_data.to_csv("simdata" + str(counter) + '.csv')
+        dfs_list.append(runsimulations.run_simulations(models, 1, simulation_data['id'].astype('int').max(), simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
 
     average_bics = []
     for df_list in dfs_list:
         bics = [df['bic'].mean() for df in df_list]
+        print(bics)
         average_bics.append(bics)
 
     # Create a DataFrame from the average BIC values
     average_bics_df = pd.DataFrame(average_bics)
+    print(average_bics_df)
 
     # Create heatmap using seaborn
     plt.figure(figsize=(10, 6))
