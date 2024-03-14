@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 def convertToDF(tuple_data):
     return pd.DataFrame({
         'id': [1] * 100,
-        'Trial': tuple_data[0],
-        'Choice': tuple_data[1],
-        'ReactionTime': tuple_data[2],
-        'Congruence': tuple_data[3]
+        'trial': tuple_data[0],
+        'accuracy': tuple_data[1], # previously choice
+        'rt': tuple_data[2],
+        'congruency': tuple_data[3],
     })
 
 def model_recovery(models):

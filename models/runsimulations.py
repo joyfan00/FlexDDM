@@ -3,7 +3,9 @@ from .Model import Model
 import sys
 
 def run_simulations(models, startingParticipants, endingParticipants, input_data, fileName='output.csv', return_dataframes = False):
-    input_data = Model.getRTData(input_data)
+    if isinstance(input_data, str): 
+        print("in path instance")
+        input_data = Model.getRTData(input_data)
     dflist = []
     for model in models:
         df = pd.DataFrame(columns = ['id'] + model.parameter_names + ['X^2', 'bic'])
