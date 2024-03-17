@@ -1,4 +1,4 @@
-,id,Trial,Choice,ReactionTime,Congruence
+,id,trial,accuracy,rt,congruency
 0,1,1,0.0,5.143760371602283,congruent
 1,1,2,0.0,4.643760371602293,congruent
 2,1,3,0.0,4.243760371602302,congruent
