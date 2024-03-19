@@ -55,11 +55,8 @@ class Model:
         """
         Fits the data according to the model. 
 
-        @data (): 
+        @function (): 
         @params (dict): contains a dictionary of parameters 
-        @nTrials (int): number of trials to try to fit data 
-        @cores (int): number of cores 
-        @bins (int): number of bins 
         @run (int): counter for what run number 
         """
 
