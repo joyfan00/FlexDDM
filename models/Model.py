@@ -74,9 +74,9 @@ class Model:
                         method='Nelder-Mead')
         else:
             fit = differential_evolution(Model.model_function, bounds=bounds_var, x0=params,
-                                    args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=1000, seed=10,
-                                    disp=True, popsize=100, polish=True, callback=printCurrentIteration, workers=-1)
-            
+                                    args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=1, seed=10,
+                                    disp=True, popsize=1, polish=True, callback=printCurrentIteration, workers=-1)
+            # popsize = 100, maxiter = 1000
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat

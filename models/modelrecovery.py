@@ -26,6 +26,8 @@ def model_recovery(models):
             for lower_bound, upper_bound in model.bounds:
                 initial_params.append(np.random.uniform(lower_bound, upper_bound))
             print(initial_params)
+            # simulate for each participant separately in a try catch, resample the params if not good
+            # if they are all incorrect, you have a problem --> resample
             simulation_data = pd.concat([simulation_data, convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), x)])
             
         dfs_list.append(runsimulations.run_simulations(models, 1, simulation_data['id'].astype('int').max(), simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
