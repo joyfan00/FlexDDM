@@ -39,29 +39,22 @@ def model_recovery(models):
     for dfs in dfs_list:
         BIC_df = pd.DataFrame()
         for df in dfs:
+            BIC_df[models[counter].__class__.__name__] = df['BIC']
             counter += 1
-            BIC_df[str(counter), ' BIC'] = df['BIC']
-        BIC_mins = BIC_df.idxmin(axis=1) 
+        BIC_mins = BIC_df.idxmin(axis=1)  # finds the minimum value in the row, returns column name where min was found
+        print(BIC_mins)
         min_BIC_model_counts.append(BIC_mins.value_counts())
+    for model_BIC_df in min_BIC_model_counts:
+
     # for each list inside the minbicmodellist:
-        # find percentage of participants best fit by each model by doing the 
-            # number of occurences over total (50)
+        # find percentage of participants best fit by each model by doing the number of occurences over total (50)
 
-    
-
-            
                  # compare the BICs in each row to find the minimum BIC for each participant. 
         # keep a tally of which column has the most minimum BICs total
         # 
         
-        
         #BIC_list=[0.2,0.1,0.3]
         #depending on what index the lowest one is, increment the counter for that model
-
-
-
-            
-
 
 
             print("###########")
