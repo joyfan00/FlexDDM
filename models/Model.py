@@ -210,7 +210,7 @@ class Model:
             temp_s_acc = temp_s[temp_s['accuracy']==1]
             acc = len(temp_s_acc)/len(temp_s)
             cdf_propslist.append([x*acc for x in cdfs])
-            temp_quantiles = np.quantile(temp_s['rt'], cafs)
+            temp_quantiles = np.nanpercentile(temp_s['rt'], cafs)
             caf_propslist.append([])
             for i, q in enumerate(temp_quantiles):
                 if i == 0:
@@ -236,9 +236,11 @@ class Model:
 
         for k, s in enumerate(subs):
             temp = data[data['id']==s]
-            cafs = np.quantile(temp['rt'], QUANTILES_CAF)
-            cdfslist.append(np.quantile(temp[temp['accuracy']==1]['rt'], QUANTILES_CDF))
-            cafcutofflist.append(np.quantile(temp['rt'], QUANTILES_CAF))
+            print("temp: ", temp)
+            print("NaN count: ", temp['rt'].isna().sum())
+            cafs = np.nanpercentile(temp['rt'], QUANTILES_CAF)
+            cdfslist.append(np.nanpercentile(temp[temp['accuracy']==1]['rt'], QUANTILES_CDF))
+            cafcutofflist.append(np.nanpercentile(temp['rt'], QUANTILES_CAF))
             for i, q in enumerate(QUANTILES_CAF):
                 if i == 0:
                     temp_q = temp[temp['rt'] <= cafs[i]]
@@ -255,7 +257,13 @@ class Model:
         group_accuracy = list(pd.DataFrame(acclist).mean())
         group_caf_quantiles = pd.DataFrame({'rt': group_rt, 'acc': group_accuracy})
         group_cdf_quantiles = list(pd.DataFrame(cdfslist).mean())
+        if len(group_cdf_quantiles) < 1:
+            group_cdf_quantiles.append(0)
+        print("group cdf quantiles: ", group_cdf_quantiles)
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
+        if len(group_caf_cutoffs) < 1:
+            group_caf_cutoffs.append(0)
+        print("group caf cutoffs: ", group_caf_cutoffs)
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
   
@@ -310,6 +318,7 @@ class Model:
                 props_caf.append(len(temp[temp['accuracy']==0])/len(data))
             else:
                 props_caf.append(0)
+        print("caf cutoffs: ", cafcutoffs)
         temp = data[data['rt'] > cafcutoffs[-1]]
         if len(temp) > 0:
             props_caf.append(len(temp[temp['accuracy']==0])/len(data))

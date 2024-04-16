@@ -17,19 +17,25 @@ def convertToDF(tuple_data, participant_id):
     })
 
 def model_recovery(models):
+    broken = True
     dfs_list = []
     counter = 0
     for model in models:
         simulation_data = pd.DataFrame()
         for x in range(5): ######50
-            initial_params = []
-            for lower_bound, upper_bound in model.bounds:
-                initial_params.append(np.random.uniform(lower_bound, upper_bound))
-            print(initial_params)
-            # simulate for each participant separately in a try catch, resample the params if not good
-            # if they are all incorrect, you have a problem --> resample
-            simulation_data = pd.concat([simulation_data, convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), x)])
-            
+            while broken:
+                try: 
+                    initial_params = []
+                    for lower_bound, upper_bound in model.bounds:
+                        initial_params.append(np.random.uniform(lower_bound, upper_bound))
+                    print("init params: ", initial_params)
+                    # simulate for each participant separately in a try catch, resample the params if not good
+                    # if they are all incorrect, you have a problem --> resample
+                    simulation_data = pd.concat([simulation_data, convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), x)])
+                    broken = False
+                except:
+                    broken = True
+
         dfs_list.append(runsimulations.run_simulations(models, 0, 4, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
     # Initialize lists to store counts of best fit models for each simulation ---> simulation_data['id'].astype('int').max()
     best_fit_counts = []
