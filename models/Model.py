@@ -26,9 +26,9 @@ class Model:
     global NTRIALS
     NTRIALS = 100
     global QUANTILES_CDF 
-    QUANTILES_CDF = [0.1, 0.3, 0.5, 0.7, 0.9]
+    QUANTILES_CDF = [.10, .30, .50, .70, .90]
     global QUANTILES_CAF
-    QUANTILES_CAF = [0.25, 0.5, 0.75]
+    QUANTILES_CAF = [.25, .50, .75]
 
     def __init__(self, param_number, bounds, parameter_names):
         """
@@ -75,7 +75,7 @@ class Model:
         else:
             fit = differential_evolution(Model.model_function, bounds=bounds_var, x0=params,
                                     args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=1, seed=10,
-                                    disp=True, popsize=1, polish=True, callback=printCurrentIteration, workers=-1)
+                                    disp=True, popsize=1, polish=True, callback=printCurrentIteration, workers=1)
             # popsize = 100, maxiter = 1000
         bestparams = fit.x
         fitstat = fit.fun
@@ -94,9 +94,7 @@ class Model:
         @bins (int): number of bins 
         @final (bool): if this is the final trial or not  
         """
-        
-        if min(x) < 0:
-            return sys.maxsize
+
         m = Model(bounds=bounds, param_number=param_number, parameter_names=parameter_names)
         predictions = m.model_predict(function, x, props)
         empirical_proportions = [props['cdf_props_congruent'], props['cdf_props_incongruent'],
@@ -156,7 +154,7 @@ class Model:
 
         return sim_data
 
-    def proportions(self, data, cdfs=[0.1, 0.3, 0.5, 0.7, 0.9], cafs=[0.25, 0.5, 0.75]):
+    def proportions(self, data, cdfs, cafs):
         """
         Calculate proportion of how percentage of RTs in quantiles. 
         @data (): simulated data
@@ -196,7 +194,7 @@ class Model:
         proportionslist.append(1 - c)
         return proportionslist
 
-    def cdf_caf_proportions(self, data, cdfs=[0.1, 0.3, 0.5, 0.7, 0.9], cafs=[0.25, 0.50, 0.75]):
+    def cdf_caf_proportions(self, data, cdfs, cafs):
         """
         @data (): 
         @cdfs ():
@@ -210,7 +208,7 @@ class Model:
             temp_s_acc = temp_s[temp_s['accuracy']==1]
             acc = len(temp_s_acc)/len(temp_s)
             cdf_propslist.append([x*acc for x in cdfs])
-            temp_quantiles = np.nanpercentile(temp_s['rt'], cafs)
+            temp_quantiles = np.nanpercentile(temp_s['rt'], [c*100 for c in cafs])
             caf_propslist.append([])
             for i, q in enumerate(temp_quantiles):
                 if i == 0:
@@ -233,21 +231,24 @@ class Model:
         errorproplist = []
         cdfslist = []
         cafcutofflist = []
-
+        print("SUBS: ", subs)
+        print("DATA: ", data)
         for k, s in enumerate(subs):
             temp = data[data['id']==s]
-            print("temp: ", temp)
-            print("NaN count: ", temp['rt'].isna().sum())
-            cafs = np.nanpercentile(temp['rt'], QUANTILES_CAF)
-            cdfslist.append(np.nanpercentile(temp[temp['accuracy']==1]['rt'], QUANTILES_CDF))
-            cafcutofflist.append(np.nanpercentile(temp['rt'], QUANTILES_CAF))
-            for i, q in enumerate(QUANTILES_CAF):
+            print("temp: ",temp)
+            cafs = np.nanpercentile(temp['rt'], [q * 100 for q in QUANTILES_CAF]) 
+            print("cafs: ", cafs)
+            cdfslist.append(np.nanpercentile(temp[temp['accuracy']==1]['rt'], [q * 100 for q in QUANTILES_CDF]))
+            cafcutofflist.append(np.nanpercentile(temp['rt'], [q * 100 for q in QUANTILES_CAF]))
+            for i, q in enumerate([q * 100 for q in QUANTILES_CAF]):
                 if i == 0:
                     temp_q = temp[temp['rt'] <= cafs[i]]
+                    print("temp q length: ", len(temp_q), "i: ", i)
                     meanrtlist.append([np.mean(temp_q['rt'])])
                     acclist.append([np.mean(temp_q['accuracy'])])
                 else:
                     temp_q = temp[temp['rt'] <= cafs[i]].loc[temp['rt'] > cafs[i-1]]
+                    print("temp_q length: ", len(temp_q), "i: ", i)
                     meanrtlist[k].append(np.mean(temp_q['rt']))
                     acclist[k].append(np.mean(temp_q['accuracy']))
             temp_q = temp[temp['rt'] > cafs[-1]]
@@ -257,11 +258,11 @@ class Model:
         group_accuracy = list(pd.DataFrame(acclist).mean())
         group_caf_quantiles = pd.DataFrame({'rt': group_rt, 'acc': group_accuracy})
         group_cdf_quantiles = list(pd.DataFrame(cdfslist).mean())
-        if len(group_cdf_quantiles) < 1:
+        if group_cdf_quantiles[0] == np.nan:
             group_cdf_quantiles.append(0)
         print("group cdf quantiles: ", group_cdf_quantiles)
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
-        if len(group_caf_cutoffs) < 1:
+        if group_caf_cutoffs[0] == np.nan:
             group_caf_cutoffs.append(0)
         print("group caf cutoffs: ", group_caf_cutoffs)
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
@@ -318,7 +319,6 @@ class Model:
                 props_caf.append(len(temp[temp['accuracy']==0])/len(data))
             else:
                 props_caf.append(0)
-        print("caf cutoffs: ", cafcutoffs)
         temp = data[data['rt'] > cafcutoffs[-1]]
         if len(temp) > 0:
             props_caf.append(len(temp[temp['accuracy']==0])/len(data))
