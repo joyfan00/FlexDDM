@@ -231,13 +231,9 @@ class Model:
         errorproplist = []
         cdfslist = []
         cafcutofflist = []
-        print("SUBS: ", subs)
-        print("DATA: ", data)
         for k, s in enumerate(subs):
             temp = data[data['id']==s]
-            print("temp: ",temp)
             cafs = np.nanpercentile(temp['rt'], [q * 100 for q in QUANTILES_CAF]) 
-            print("cafs: ", cafs)
             cdfslist.append(np.nanpercentile(temp[temp['accuracy']==1]['rt'], [q * 100 for q in QUANTILES_CDF]))
             cafcutofflist.append(np.nanpercentile(temp['rt'], [q * 100 for q in QUANTILES_CAF]))
             for i, q in enumerate([q * 100 for q in QUANTILES_CAF]):
@@ -258,12 +254,12 @@ class Model:
         group_accuracy = list(pd.DataFrame(acclist).mean())
         group_caf_quantiles = pd.DataFrame({'rt': group_rt, 'acc': group_accuracy})
         group_cdf_quantiles = list(pd.DataFrame(cdfslist).mean())
-        if group_cdf_quantiles[0] == np.nan:
-            group_cdf_quantiles.append(0)
+        if np.isnan(group_cdf_quantiles[0]) == True:
+            group_cdf_quantiles = [0] * len(QUANTILES_CDF)
         print("group cdf quantiles: ", group_cdf_quantiles)
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
-        if group_caf_cutoffs[0] == np.nan:
-            group_caf_cutoffs.append(0)
+        if np.isnan(group_caf_cutoffs[0]) == True:
+            group_caf_cutoffs = [0] * len(QUANTILES_CAF)
         print("group caf cutoffs: ", group_caf_cutoffs)
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
