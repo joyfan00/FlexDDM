@@ -49,7 +49,8 @@ def model_recovery(models):
         print("!!!!!", BIC_df)
         BIC_mins = BIC_df.idxmin(axis=1)  # finds the minimum value in the row, returns column name where min was found
         print("#####", BIC_mins) 
-        min_BIC_model_counts.append(BIC_mins.value_counts().reset_index())
+        # print("BIC MIN COLUMN NAME: ", BIC_mins.column)
+        min_BIC_model_counts.append(BIC_mins.value_counts().reindex([model.__class__.__name__ for model in models]).reset_index())
     
     # Initialize a list to store the probabilities for each model_BIC_df
     probabilities = []
@@ -58,16 +59,31 @@ def model_recovery(models):
     for model_BIC_df in min_BIC_model_counts:
         # Extract the probabilities and append them to the list
         probabilities.append(model_BIC_df['count']/5)
+    
+    # Convert probabilities to DataFrame
+    probabilities_df = pd.DataFrame(probabilities)
+
+    # Fill NaN values with 0
+    probabilities_df = probabilities_df.fillna(0)
 
     # Create a heatmap using seaborn
     sns.set(font_scale=1.2)  # Adjust font size if needed
     plt.figure(figsize=(10, 8))  # Adjust figure size if needed
-    sns.heatmap(probabilities, cmap='coolwarm', annot=True, fmt=".2f", linewidths=.5, yticklabels=False)
+    heatmap = sns.heatmap(probabilities_df, cmap='crest', annot=True, fmt=".2f", linewidths=.5,
+                        xticklabels=[model.__class__.__name__ for model in models],
+                        yticklabels=[model.__class__.__name__ for model in models])
+
+    # Rotate x-labels and set their position to top
+    heatmap.xaxis.tick_top()
 
     # Set labels and title
-    plt.xlabel('Models')
-    plt.ylabel('Dataframes')
-    plt.title('Probability of Each Model')
+    plt.xlabel('Fit Model')
+    plt.ylabel('Synthetic Data')
+
+    plt.show()
+
+    figure = heatmap.get_figure()    
+    figure.savefig('model_validation.png', dpi=400)
 
 # # Show the plot
 # plt.show()
