@@ -15,7 +15,7 @@ class SSP(Model):
     global data
     parameter_names = ['alpha', 'beta', 'p', 'sd_0', 'sd_r', 'tau']
     
-    DT = 0.01
+    DT = 0.1 # NORMAL: 0.01
     VAR = 0.1
     NTRIALS = 100
     NOISESEED = 50

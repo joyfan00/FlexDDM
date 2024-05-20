@@ -6,6 +6,7 @@ from models import runsimulations
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
 
 def convertToDF(tuple_data, participant_id):
     return pd.DataFrame({
@@ -36,8 +37,6 @@ def model_recovery(models):
                     broken = True
 
         dfs_list.append(runsimulations.run_simulations(models, 0, 4, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
-    # Initialize lists to store counts of best fit models for each simulation ---> simulation_data['id'].astype('int').max()
-    best_fit_counts = []
     # Iterate over the list of dataframes
     min_BIC_model_counts = []
     for dfs in dfs_list:
@@ -85,46 +84,64 @@ def model_recovery(models):
     figure = heatmap.get_figure()    
     figure.savefig('model_validation.png', dpi=400)
 
-# # Show the plot
-# plt.show()
+# one set of parameters 
+# we'd take those parameters, simulate the data according to that set of parameters, 
+# then fit the model to the simulated data to see the comparison btw the found params and initial set
+# then use heatmap to show the comparisons between the parameter values 
+def param_recovery(models):
+    counter = 0
+    for model in models:
+        generated_params = []
+        fit_params_list = []
+        # for x in range(1): ######50
+        broken = True
+        while broken:
+            simulation_data = pd.DataFrame()
+            try: 
+                initial_params = []
+                # randomly generating parameters 
+                for lower_bound, upper_bound in model.bounds:
+                    initial_params.append(np.random.uniform(lower_bound, upper_bound))
+                generated_params.append(initial_params)
+                print("init params: ", initial_params)
+                # creating a giant dataframe with the data from one singular model 
+                simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), 0)
+                print("sim data: \n", simulation_data)
+                fit_data = runsimulations.run_simulations(models, 0, 0, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv')
+                fit_data = fit_data.drop(columns=['id', 'X^2', 'bic'])
+                fit_data = fit_data.reset_index(drop=True)
+                fit_data = fit_data.iloc[0].tolist()
+                fit_params_list.append(fit_data)
+                broken = False
+            except:
+                print("FITTING CANNOT OCCUR")
+                broken = True
+                
+        # check the correlation 
+        # Convert the nested lists into numpy arrays for easier manipulation
+        array1 = np.array(generated_params)
+        array2 = np.array(fit_params_list)
 
-    #create a heatmap where each row corresponds to a different  model_BIC_df from min_BIC_model_counts. the values should come from the probability column
+        # Initialize a matrix to store the average correlation coefficients
+        num_sublists = array1.shape[0]
+        average_correlation_matrix = np.zeros((num_sublists, num_sublists))
 
+        # Calculate the correlations for each pair of sublists
+        for i in range(num_sublists):
+            for j in range(num_sublists):
+                correlation_values = []
+                for k in range(array1.shape[1]):
+                    correlation, _ = pearsonr(array1[i], array2[j])
+                    correlation_values.append(correlation)
+                average_correlation_matrix[i, j] = np.mean(correlation_values)
 
+        # Create a DataFrame for the averaged correlation matrix
+        sublists_labels = [f'Sublist{i+1}' for i in range(num_sublists)]
+        average_correlation_df = pd.DataFrame(average_correlation_matrix, index=sublists_labels, columns=sublists_labels)
 
-    # for each list inside the minbicmodellist:
-        # find percentage of participants best fit by each model by doing the number of occurences over total (50)
+        # Create a heatmap using seaborn
+        sns.heatmap(average_correlation_df, annot=True, cmap='crest', vmin=-1, vmax=1)
 
-                 # compare the BICs in each row to find the minimum BIC for each participant. 
-        # keep a tally of which column has the most minimum BICs total
-        # 
-        
-        #BIC_list=[0.2,0.1,0.3]
-        #depending on what index the lowest one is, increment the counter for that model
-
-
-            # print("###########")
-            # print(type(df))
-            # print(df)
-            # # Initialize counters for each model
-            # model_counts = {i: 0 for i in range(len(models))}
-            # # Iterate over each row (participant) in the dataframe
-            # for index, row in df.iterrows():
-            #     # Find the index of the model with the minimum BIC for the current participant
-            #     best_model_index = np.argmin(row.values)
-            #     # Increment the count for the best fit model index
-            #     model_counts[best_model_index] += 1
-            # # Append the counts for the current simulation to the list
-            # best_fit_counts.append(model_counts)
-
-    # Calculate the percentage of participants for each model
-    # total_participants = simulation_data['id'].nunique()
-    # percentages = [[counts[i] / total_participants * 100 for i in range(len(models))] for counts in best_fit_counts]
-
-    # # Create a heatmap to visualize the percentage of participants best fit by each model for each simulation
-    # plt.figure(figsize=(10, 6))
-    # sns.heatmap(percentages, annot=True, cmap="YlGnBu", xticklabels=[f'Model {i}' for i in range(len(models))], yticklabels=[f'Simulation {i}' for i in range(len(dfs_list))])
-    # plt.title("Percentage of Participants Best Fit by Each Model for Each Simulation")
-    # plt.xlabel("Model")
-    # plt.ylabel("Simulation")
-    # plt.show()
+        # Display the heatmap
+        plt.title('Averaged Correlation Matrix Heatmap')
+        plt.show()
