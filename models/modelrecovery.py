@@ -93,55 +93,50 @@ def param_recovery(models):
     for model in models:
         generated_params = []
         fit_params_list = []
-        # for x in range(1): ######50
-        broken = True
-        while broken:
-            simulation_data = pd.DataFrame()
-            try: 
-                initial_params = []
-                # randomly generating parameters 
-                for lower_bound, upper_bound in model.bounds:
-                    initial_params.append(np.random.uniform(lower_bound, upper_bound))
-                generated_params.append(initial_params)
-                print("init params: ", initial_params)
-                # creating a giant dataframe with the data from one singular model 
-                simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), 0)
-                print("sim data: \n", simulation_data)
-                fit_data = runsimulations.run_simulations(models, 0, 0, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv')
-                fit_data = fit_data.drop(columns=['id', 'X^2', 'bic'])
-                fit_data = fit_data.reset_index(drop=True)
-                fit_data = fit_data.iloc[0].tolist()
-                fit_params_list.append(fit_data)
-                broken = False
-            except:
-                print("FITTING CANNOT OCCUR")
-                broken = True
-                
-        # check the correlation 
-        # Convert the nested lists into numpy arrays for easier manipulation
-        array1 = np.array(generated_params)
-        array2 = np.array(fit_params_list)
-
-        # Initialize a matrix to store the average correlation coefficients
-        num_sublists = array1.shape[0]
-        average_correlation_matrix = np.zeros((num_sublists, num_sublists))
+        for x in range(200): ######50
+            np.random.seed(x)
+            broken = True
+            while broken:
+                simulation_data = pd.DataFrame()
+                try: 
+                    initial_params = []
+                    # randomly generating parameters 
+                    for lower_bound, upper_bound in model.bounds:
+                        initial_params.append(np.random.uniform(lower_bound, upper_bound))
+                    generated_params.append(initial_params)
+                    print("init params: ", initial_params)
+                    # creating a giant dataframe with the data from one singular model 
+                    simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), 0)
+                    print("sim data: \n", simulation_data)
+                    fit_data = runsimulations.run_simulations(models, 0, 0, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv')
+                    fit_data = fit_data[0]
+                    print(fit_data)
+                    print(type(fit_data))
+                    fit_data = fit_data.drop(columns=['id', 'X^2', 'bic'])
+                    fit_data = fit_data.reset_index(drop=True)
+                    fit_data = fit_data.iloc[0].tolist()
+                    fit_params_list.append(fit_data)
+                    broken = False
+                except Exception as e:
+                    print(e)
+                    print("FITTING CANNOT OCCUR")
+                    broken = True
+        
+        print(fit_params_list)
+        print(generated_params)
+        correlation_values = []
+        sig_values = []
 
         # Calculate the correlations for each pair of sublists
-        for i in range(num_sublists):
-            for j in range(num_sublists):
-                correlation_values = []
-                for k in range(array1.shape[1]):
-                    correlation, _ = pearsonr(array1[i], array2[j])
-                    correlation_values.append(correlation)
-                average_correlation_matrix[i, j] = np.mean(correlation_values)
-
-        # Create a DataFrame for the averaged correlation matrix
-        sublists_labels = [f'Sublist{i+1}' for i in range(num_sublists)]
-        average_correlation_df = pd.DataFrame(average_correlation_matrix, index=sublists_labels, columns=sublists_labels)
-
-        # Create a heatmap using seaborn
-        sns.heatmap(average_correlation_df, annot=True, cmap='crest', vmin=-1, vmax=1)
-
-        # Display the heatmap
-        plt.title('Averaged Correlation Matrix Heatmap')
-        plt.show()
+        for i, param_name in enumerate(model.parameter_names):
+            generated_i = [sublist[i] for sublist in generated_params]
+            fit_params_i = [sublist[i] for sublist in fit_params_list]
+            df = pd.DataFrame({'simulated %s' % param_name : generated_i, 'fit %s' % param_name : fit_params_i})
+            correlation, sig_value = pearsonr(generated_i, fit_params_i)
+            correlation_values.append(correlation)
+            sig_values.append(sig_value)
+            sns.lmplot(df, x='simulated %s' % param_name, y='fit %s' % param_name)
+            plt.show()
+        
+        print(correlation_values)
+        print(sig_values)
