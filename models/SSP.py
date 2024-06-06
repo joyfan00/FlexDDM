@@ -30,9 +30,9 @@ class SSP(Model):
                 self.data = self.getRTData(data)
             else:
                 self.data = data
-            self.bounds = [(0,20),(0,1),(0,2),(0,10),(0,100),(0,min(self.data['rt']))]
+            self.bounds = [(0.07, 0.19),(0.15, 0.45),(0.2, 0.55),(1,2.6),(0.01,0.026),(0,min(self.data['rt']))]
         else: 
-            self.bounds = [(0,20),(0,1),(0,2),(0,10),(0,100),(0,5)]
+            self.bounds = [(0.07, 0.19),(0.15, 0.45),(0.2, 0.55),(1,2.6),(0.01,0.026),(0,5)]
 
 
         super().__init__(self.param_number, self.bounds, self.parameter_names)
