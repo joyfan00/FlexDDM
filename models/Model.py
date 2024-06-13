@@ -239,12 +239,12 @@ class Model:
             for i, q in enumerate([q * 100 for q in QUANTILES_CAF]):
                 if i == 0:
                     temp_q = temp[temp['rt'] <= cafs[i]]
-                    print("temp q length: ", len(temp_q), "i: ", i)
+                    # print("temp q length: ", len(temp_q), "i: ", i)
                     meanrtlist.append([np.mean(temp_q['rt'])])
                     acclist.append([np.mean(temp_q['accuracy'])])
                 else:
                     temp_q = temp[temp['rt'] <= cafs[i]].loc[temp['rt'] > cafs[i-1]]
-                    print("temp_q length: ", len(temp_q), "i: ", i)
+                    # print("temp_q length: ", len(temp_q), "i: ", i)
                     meanrtlist[k].append(np.mean(temp_q['rt']))
                     acclist[k].append(np.mean(temp_q['accuracy']))
             temp_q = temp[temp['rt'] > cafs[-1]]

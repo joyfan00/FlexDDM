@@ -36,7 +36,7 @@ class DSTP(Model):
             
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
-    @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
+    @nb.jit(nopython=False, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS, delta_target, delta_flanker, deltaRS, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DSTP model.

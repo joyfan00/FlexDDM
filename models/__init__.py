@@ -4,3 +4,6 @@ from .DMC import DMC
 from .StandardDDM import StandardDDM
 from .modelrecovery import *
 from .runsimulations import *
+from .convertdf import *
+from .parameterrecovery import *
+from .posteriorpredictivechecks import *
