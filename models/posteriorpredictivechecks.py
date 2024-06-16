@@ -44,7 +44,7 @@ def posterior_predictive(models, startingParticipants, endingParticipants, input
             pars = list(pars)
             print("PARS TYPE: ", type(pars))
             print(pars)
-            res = model.model_simulation(*pars, nTrials = endingParticipants-startingParticipants+1)
+            res = model.modelsimulationfunction(*pars, nTrials = 300)
             print(res)
             # Plot the raw values
             plt.plot(simulated_rts, label='Simulated', marker='o')
