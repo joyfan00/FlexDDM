@@ -16,7 +16,7 @@ class DSTP(Model):
     parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
     DT = 0.01
     VAR = 0.1
-    NTRIALS = 100
+    NTRIALS = 300
     NOISESEED = 50
 
     def __init__(self, data=None):

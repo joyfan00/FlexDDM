@@ -44,8 +44,12 @@ def posterior_predictive(models, startingParticipants, endingParticipants, input
             pars = list(pars)
             print("PARS TYPE: ", type(pars))
             print(pars)
+        
             res = model.modelsimulationfunction(*pars, nTrials = 300)
             print(res)
+            simulated_rts = convertToDF(res, id)['rt'].tolist()
+            print("sim: ",simulated_rts)
+
             # Plot the raw values
             plt.plot(simulated_rts, label='Simulated', marker='o')
             plt.plot(input_data["rt"].to_list(), label='Experimental', marker='x')
