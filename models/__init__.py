@@ -2,8 +2,7 @@ from .DSTP import DSTP
 from .SSP import SSP
 from .DMC import DMC
 from .StandardDDM import StandardDDM
-from .modelrecovery import *
+from .validationtools import *
 from .runsimulations import *
 from .convertdf import *
-from .parameterrecovery import *
-from .posteriorpredictivechecks import *
+from .main import *
