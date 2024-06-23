@@ -14,9 +14,9 @@ class DMC (Model):
     global data
     parameter_names = ['alpha', 'beta', 'mu_c', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
 
-    DT = 0.01
+    DT = 0.001
     VAR = 0.1
-    NTRIALS = 100
+    NTRIALS = 1000
     NOISESEED = 50
 
     def __init__(self, data=None):

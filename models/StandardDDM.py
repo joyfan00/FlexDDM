@@ -30,7 +30,7 @@ class StandardDDM(Model):
                 self.data = data
             self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,min(self.data['rt']))]
         else: 
-            self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,5)]
+            self.bounds = [(0,20),(0,20),(0,1),(-100),(-10,10),(0,5)]
         
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 

@@ -14,9 +14,9 @@ class DSTP(Model):
     param_number = 9
     global bounds
     parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
-    DT = 0.01
+    DT = 0.001
     VAR = 0.1
-    NTRIALS = 300
+    NTRIALS = 1000
     NOISESEED = 50
 
     def __init__(self, data=None):
