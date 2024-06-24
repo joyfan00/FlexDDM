@@ -55,7 +55,7 @@ def fit(models, startingParticipants, endingParticipants, input_data, fileName='
                                         'simulated_rts':simulated_rts['rt'].tolist(),
                                         'simulated_congruency':simulated_rts['congruency'].tolist(),
                                         'simulated_accuracy':simulated_rts['accuracy'].tolist()}) # have multiple columns that specify the congruency and accuracy 
-                fig, axes = plt.subplots(2, 2)
+                fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
                 for x, i in zip([['congruent', 1], ['congruent', 0], ['incongruent', 1], ['congruent', 0]], [axes[0, 0], axes[0,1], axes[1,0], axes[1, 1]]):
                     experimental_rt_data = rt_data[rt_data['experimental_congruency']==x[0]][rt_data['experimental_accuracy']==x[1]]
                     simulated_rt_data = rt_data[rt_data['experimental_congruency']==x[0]][rt_data['experimental_accuracy']==x[1]]
