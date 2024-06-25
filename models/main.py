@@ -62,7 +62,7 @@ def fit(models, startingParticipants, endingParticipants, input_data, fileName='
                     sns.kdeplot(simulated_rt_data, x='simulated_rts', label='simulated reaction times', ax=i)
                     sns.kdeplot(experimental_rt_data, x='experimental_rts', label='experimental reaction times', ax=i)
                     i.annotate('Experimental Data: ' + str(len(experimental_rt_data)) + ' participants', xy=(0.96,1), xycoords='axes fraction', xytext=(+0.5, -0.5), 
-                               textcoords='offset fontsize', fontsize='small', horizontalalignment='right', verticalalignment='top', fontfamily='arial', bbox=dict(facecolor='0.7', edgecolor='none', pad=3.0))
+                               textcoords='offset fontsize', fontsize='small', horizontalalignment='right', verticalalignment='top', fontfamily='arial', bbox=dict(facecolor='white', edgecolor='none', pad=3.0))
                 fig.suptitle('Posterior Predictive Check Participant ' + str(id))
                 fig.legend(bbox_to_anchor=(0, 0))
                 plt.tight_layout()
