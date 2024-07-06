@@ -41,52 +41,54 @@ def fit(models, startingParticipants, endingParticipants, input_data, fileName='
             print(myprops)
             bic = Model.model_function(pars, myprops, model.param_number, model.parameter_names, model.modelsimulationfunction, current_input, model.bounds, final=True)
             df.loc[len(df)] = [id] + list(pars) + [fitstat, bic]
-                        
+
             if posterior_predictive_check:
                 pars = list(pars)
                 res = model.modelsimulationfunction(*pars, nTrials=len(current_input))
                 simulated_rts = convertToDF(res, id)
 
-                # experimental congruency, experimental accuracy, simulated congruency, simulated accuracy 
-                # loop through 4 times, first pass find only the KDE simulated & experimental RTs correct and congruent, incorrect and congruent, correct and incongruent, incorrect and incongruent 
+                # Prepare the combined DataFrame
                 rt_data = pd.DataFrame({
-                    'experimental_rts': current_input["rt"].tolist(), 
+                    'experimental_rts': current_input["rt"].tolist(),
                     'experimental_congruency': current_input['congruency'].tolist(),
                     'experimental_accuracy': current_input['accuracy'].tolist(),
                     'simulated_rts': simulated_rts['rt'].tolist(),
                     'simulated_congruency': simulated_rts['congruency'].tolist(),
                     'simulated_accuracy': simulated_rts['accuracy'].tolist()
-                }) # have multiple columns that specify the congruency and accuracy 
+                })
 
                 fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
-                labels_added = set()  # To keep track of added labels
+                labels_added = set()
 
-                for x, i in zip([['congruent', 1], ['congruent', 0], ['incongruent', 1], ['incongruent', 0]], [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]):
-                    experimental_rt_data = rt_data[(rt_data['experimental_congruency'] == x[0]) & (rt_data['experimental_accuracy'] == x[1])]
-                    simulated_rt_data = rt_data[(rt_data['simulated_congruency'] == x[0]) & (rt_data['simulated_accuracy'] == x[1])]
+                conditions = [
+                    (['congruent', 1], axes[0, 0]),
+                    (['congruent', 0], axes[0, 1]),
+                    (['incongruent', 1], axes[1, 0]),
+                    (['incongruent', 0], axes[1, 1])
+                ]
 
-                    if 'simulated reaction times' not in labels_added:
-                        sns.kdeplot(simulated_rt_data, x='simulated_rts', label='simulated reaction times', ax=i)
-                        labels_added.add('simulated reaction times')
-                    else:
-                        sns.kdeplot(simulated_rt_data, x='simulated_rts', label='_nolegend_', ax=i)
+                for (condition, ax) in conditions:
+                    congruency, accuracy = condition
+                    experimental_rt_data = rt_data[(rt_data['experimental_congruency'] == congruency) & (rt_data['experimental_accuracy'] == accuracy)]
+                    simulated_rt_data = rt_data[(rt_data['simulated_congruency'] == congruency) & (rt_data['simulated_accuracy'] == accuracy)]
 
-                    if 'experimental reaction times' not in labels_added:
-                        sns.kdeplot(experimental_rt_data, x='experimental_rts', label='experimental reaction times', ax=i)
-                        labels_added.add('experimental reaction times')
-                    else:
-                        sns.kdeplot(experimental_rt_data, x='experimental_rts', label='_nolegend_', ax=i)
+                    sns.kdeplot(simulated_rt_data['simulated_rts'], label='simulated reaction times' if 'simulated reaction times' not in labels_added else '_nolegend_', ax=ax)
+                    sns.kdeplot(experimental_rt_data['experimental_rts'], label='experimental reaction times' if 'experimental reaction times' not in labels_added else '_nolegend_', ax=ax)
+                    labels_added.update(['simulated reaction times', 'experimental reaction times'])
 
-                    i.annotate(f"{x[0].capitalize()}, {'Correct' if x[1] else 'Incorrect'}", xy=(0.96, 1), xycoords='axes fraction', xytext=(+0.5, -0.5), 
-                            textcoords='offset fontsize', fontsize='small', horizontalalignment='right', verticalalignment='top', fontfamily='arial', bbox=dict(facecolor='white', edgecolor='none', pad=3.0))
-                    i.annotate(f"N = {len(experimental_rt_data)}", xy=(0.96, 0.9), xycoords='axes fraction', xytext=(+0.5, -0.5),
-                            textcoords='offset fontsize', fontsize='small', horizontalalignment='right', verticalalignment='top', fontfamily='arial', bbox=dict(facecolor='white', edgecolor='none', pad=3.0))
+                    ax.annotate(f"{congruency.capitalize()}, {'Correct' if accuracy else 'Incorrect'}", xy=(0.96, 1), xycoords='axes fraction', xytext=(0, -5),
+                                textcoords='offset points', fontsize='small', ha='right', va='top', bbox=dict(facecolor='white', edgecolor='none', pad=3.0))
+                    ax.annotate(f"Experimental N = {len(experimental_rt_data)}", xy=(0.96, 0.9), xycoords='axes fraction', xytext=(0, -5),
+                                textcoords='offset points', fontsize='small', ha='right', va='top', bbox=dict(facecolor='white', edgecolor='none', pad=3.0))
+                    ax.annotate(f"Simulated N = {len(simulated_rt_data)}", xy=(0.96, 0.8), xycoords='axes fraction', xytext=(0, -5),
+                                textcoords='offset points', fontsize='small', ha='right', va='top', bbox=dict(facecolor='white', edgecolor='none', pad=3.0))
+                    ax.set_xlabel("Response Time (s)")
 
                 fig.suptitle('Posterior Predictive Check Participant ' + str(id))
-                fig.legend(loc='lower center', bbox_to_anchor=(0.5, -0.15), ncol=1)
-                plt.subplots_adjust(bottom=0.3)  # Adjust bottom to make more space for the legend
-                plt.tight_layout(rect=[0, 0.05, 1, 0.95])  # Adjust the layout to make space for the title and legend
+                plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the title
+                fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=1, bbox_transform=fig.transFigure, fontsize='x-small', edgecolor='black')
                 plt.show()
+
 
         if return_dataframes:
             dflist.append(df)
