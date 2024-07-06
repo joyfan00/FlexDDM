@@ -14,7 +14,7 @@ def model_recovery(models, num_simulations=50):
     counter = 0
     for model in models:
         simulation_data = pd.DataFrame()
-        for x in range(num_simulations): ######50
+        for x in range(num_simulations): 
             broken = True
             while broken:
                 try: 
@@ -50,24 +50,19 @@ def model_recovery(models, num_simulations=50):
     for model_BIC_df in min_BIC_model_counts:
         # Extract the probabilities and append them to the list
         probabilities.append(model_BIC_df['count']/5)
-    
-    # Convert probabilities to DataFrame
+
     probabilities_df = pd.DataFrame(probabilities)
 
-    # Fill NaN values with 0
     probabilities_df = probabilities_df.fillna(0)
 
-    # Create a heatmap using seaborn
-    sns.set(font_scale=1.2)  # Adjust font size if needed
-    plt.figure(figsize=(10, 8))  # Adjust figure size if needed
+    sns.set(font_scale=1.2)  
+    plt.figure(figsize=(10, 8))  
     heatmap = sns.heatmap(probabilities_df, cmap='crest', annot=True, fmt=".2f", linewidths=.5,
                         xticklabels=[model.__class__.__name__ for model in models],
                         yticklabels=[model.__class__.__name__ for model in models])
 
-    # Rotate x-labels and set their position to top
     heatmap.xaxis.tick_top()
 
-    # Set labels and title
     plt.xlabel('Fit Model')
     plt.ylabel('Synthetic Data')
 

@@ -72,8 +72,8 @@ def fit(models, startingParticipants, endingParticipants, input_data, fileName='
                     experimental_rt_data = rt_data[(rt_data['experimental_congruency'] == congruency) & (rt_data['experimental_accuracy'] == accuracy)]
                     simulated_rt_data = rt_data[(rt_data['simulated_congruency'] == congruency) & (rt_data['simulated_accuracy'] == accuracy)]
 
-                    sns.kdeplot(simulated_rt_data['simulated_rts'], label='simulated reaction times' if 'simulated reaction times' not in labels_added else '_nolegend_', ax=ax)
-                    sns.kdeplot(experimental_rt_data['experimental_rts'], label='experimental reaction times' if 'experimental reaction times' not in labels_added else '_nolegend_', ax=ax)
+                    sns.kdeplot(simulated_rt_data['simulated_rts'], label='simulated reaction times' if 'simulated reaction times' not in labels_added else '_nolegend_', ax=ax, color='#CC79A7')
+                    sns.kdeplot(experimental_rt_data['experimental_rts'], label='experimental reaction times' if 'experimental reaction times' not in labels_added else '_nolegend_', ax=ax, color='#0072B2')
                     labels_added.update(['simulated reaction times', 'experimental reaction times'])
 
                     ax.annotate(f"{congruency.capitalize()}, {'Correct' if accuracy else 'Incorrect'}", xy=(0.96, 1), xycoords='axes fraction', xytext=(0, -5),
@@ -86,9 +86,8 @@ def fit(models, startingParticipants, endingParticipants, input_data, fileName='
 
                 fig.suptitle('Posterior Predictive Check Participant ' + str(id))
                 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the title
-                fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=1, bbox_transform=fig.transFigure, fontsize='x-small', edgecolor='black')
+                fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=1, bbox_transform=fig.transFigure, fontsize='x-small', frameon=False)
                 plt.show()
-
 
         if return_dataframes:
             dflist.append(df)
