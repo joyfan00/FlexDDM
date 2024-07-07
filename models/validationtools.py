@@ -2,12 +2,12 @@ import pandas as pd
 from .Model import Model
 import numpy as np
 import sys
-from models import runsimulations
+from models import modelfit
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
-from .convertdf import convertToDF
+from ._utilities import convertToDF
 
 def model_recovery(models, num_simulations=50):
     dfs_list = []
@@ -28,7 +28,7 @@ def model_recovery(models, num_simulations=50):
                 except:
                     broken = True
 
-        dfs_list.append(runsimulations.run_simulations(models, 0, 4, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
+        dfs_list.append(modelfit.fit(models, 0, 4, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
     # Iterate over the list of dataframes
     min_BIC_model_counts = []
     for dfs in dfs_list:

@@ -3,6 +3,7 @@ from .Model import Model
 import numba as nb
 import numpy as np
 import math
+from models import _utilities as util
 
 """
 Class to simulate data according to the Shrinking Spotlight Model (SSP) 
@@ -20,14 +21,14 @@ class SSP(Model):
     NTRIALS = 1000
     NOISESEED = 50
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """
         Initializes a SSP model object. 
         """
         self.modelsimulationfunction = SSP.model_simulation
         if data != None:
             if isinstance(data, str): 
-                self.data = self.getRTData(data)
+                self.data = util.getRTData(data,input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
             self.bounds = [(0.07, 0.19),(0.15, 0.45),(0.2, 0.55),(1,2.6),(0.01,0.026),(0,min(self.data['rt']))]

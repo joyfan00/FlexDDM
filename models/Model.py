@@ -40,17 +40,6 @@ class Model:
         self.bounds = bounds
         self.parameter_names = parameter_names
 
-    def getRTData(self, path, id, congruency, rt, accuracy):
-        """
-        Gets the reaction time data from file. 
-
-        @path: the path to the data 
-        """
-        data = pd.read_csv(path)
-        data = pd.DataFrame({'id': data[id], 'congruency': data[congruency],'rt': [x for x in data[rt]], 'accuracy': data[accuracy]})
-        data['congruency'] = ['congruent' if x == 1 else 'incongruent' for x in data['congruency']]
-        return data
-
     def fit(self, function, data, params, run=1):
         """
         Fits the data according to the model. 

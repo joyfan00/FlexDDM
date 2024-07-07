@@ -3,6 +3,6 @@ from .SSP import SSP
 from .DMC import DMC
 from .StandardDDM import StandardDDM
 from .validationtools import *
-from .runsimulations import *
-from .convertdf import *
+from .modelfit import *
+from ._utilities import *
 from .main import *

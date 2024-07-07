@@ -2,6 +2,7 @@
 import numpy as np
 import numba as nb
 from .Model import Model
+from models import _utilities as util
 
 """
 Class to simulate data according to the Diffusion Model for Conlict (DMC) 
@@ -19,7 +20,7 @@ class DMC (Model):
     NTRIALS = 1000
     NOISESEED = 50
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """
         Initializes a DMC model object. 
         """
@@ -27,7 +28,7 @@ class DMC (Model):
 
         if data != None:
             if isinstance(data, str): 
-                self.data = self.getRTData(data)
+                self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
             self.bounds = [(0,20),(0,1),(-10,10),(1,10),(0.001,10),(0,1),(np.exp(-10),min(self.data['rt']))]
