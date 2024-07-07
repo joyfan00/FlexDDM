@@ -40,7 +40,7 @@ class Model:
         self.bounds = bounds
         self.parameter_names = parameter_names
 
-    def getRTData(self, path="S1FlankerData.csv", id="PPT", congruency="Condition", rt="RT", accuracy="Correct"):
+    def getRTData(self, path, id, congruency, rt, accuracy):
         """
         Gets the reaction time data from file. 
 

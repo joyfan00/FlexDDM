@@ -14,10 +14,10 @@ def validation(models, model_recovery=True, model_recovery_simulations=50, param
         validationtools.param_recovery(models, param_recovery_simulations)
 
 # function that performs fitting and posterior predictive checks 
-def fit(models, startingParticipants, endingParticipants, input_data, fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):
+def fit(models, startingParticipants, endingParticipants, input_data, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):
     if isinstance(input_data, str): 
         print("in path instance")
-        input_data = Model.getRTData(input_data)
+        input_data = Model.getRTData(input_data, id=input_data_id, congruency=input_data_congruency, rt=input_data_rt, accuracy=input_data_accuracy)
     dflist = []
     for model in models:
         df = pd.DataFrame(columns=['id'] + model.parameter_names + ['X^2', 'bic'])
@@ -92,6 +92,6 @@ def fit(models, startingParticipants, endingParticipants, input_data, fileName='
         if return_dataframes:
             dflist.append(df)
         else:
-            df.to_csv(model.__class__.__name__ + '_' + fileName, index=False)
+            df.to_csv(model.__class__.__name__ + '_' + output_fileName, index=False)
     if return_dataframes:
         return dflist
