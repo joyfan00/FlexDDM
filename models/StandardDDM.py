@@ -2,6 +2,7 @@
 import numpy as np
 import numba as nb
 from .Model import Model
+from models import _utilities as util
 
 """
 Class to simulate data according to the standard flanker drift diffusion model  
@@ -18,19 +19,19 @@ class StandardDDM(Model):
     NTRIALS = 100
     NOISESEED = 50
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """
         Initializes a standard diffusion model object. 
         """
         self.modelsimulationfunction = StandardDDM.model_simulation
         if data != None:
             if isinstance(data, str): 
-                self.data = self.getRTData(data)
+                self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
             self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,min(self.data['rt']))]
         else: 
-            self.bounds = [(0,20),(0,20),(0,1),(-100),(-10,10),(0,5)]
+            self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,5)]
         
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
@@ -63,7 +64,7 @@ class StandardDDM(Model):
                 alpha = alpha_i
                 delta = delta_i
             t = tau # start the accumulation process at non-decision time tau
-            evidence = beta # start our evidence at initial-bias beta
+            evidence = beta*alpha/2 - (1-beta)*alpha/2 # start our evidence at initial-bias beta
             np.random.seed(n)
             while evidence < alpha and evidence > -alpha: # keep accumulating evidence until you reach a threshold
                 evidence += delta*dt + np.random.choice(updates) # add one of the many possible updates to evidence

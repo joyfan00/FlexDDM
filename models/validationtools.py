@@ -28,7 +28,7 @@ def model_recovery(models, num_simulations=50):
                 except:
                     broken = True
 
-        dfs_list.append(modelfit.fit(models, 0, 4, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv'))
+        dfs_list.append(modelfit.fit(models, 0, num_simulations - 1, simulation_data, posterior_predictive_check=False, return_dataframes = True, output_fileName='output' + str(counter) + '.csv'))
     # Iterate over the list of dataframes
     min_BIC_model_counts = []
     for dfs in dfs_list:
@@ -95,7 +95,7 @@ def param_recovery(models, num_simulations=50):
                     # creating a giant dataframe with the data from one singular model 
                     simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), 0)
                     print("sim data: \n", simulation_data)
-                    fit_data = runsimulations.run_simulations(models, 0, 0, simulation_data, return_dataframes = True, fileName='output' + str(counter) + '.csv')
+                    fit_data = modelfit.fit(models, 0, 0, simulation_data, return_dataframes = True, posterior_predictive_check=False, fileName='output' + str(counter) + '.csv')
                     fit_data = fit_data[0]
                     print(fit_data)
                     print(type(fit_data))

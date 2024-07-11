@@ -61,17 +61,14 @@ class DMC (Model):
         update_jitter = np.random.normal(loc=0, scale=var, size=10000)
 
         # Creates congruency list with first half of trials being congruent and the following being incongruent
-        congruence_list = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)
+        congruencylist = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)
 
         for n in np.arange(0, nTrials):
-            isCongruent = False
-            if n < nTrials / 2:
-                isCongruent = True
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta*alpha/2 - (1-beta)*alpha/2
             np.random.seed(n)
             while (evidence < alpha/2 and evidence > -alpha/2): # keep accumulating evidence until you reach a threshold
-                if not isCongruent:
+                if congruencylist[n] == 'congruent':
                     delta = (-peak_amplitude * np.exp(-(t / characteristic_time)) *
                             np.power(((t * np.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / t) - (1 / characteristic_time))) + mu_c
                 else:
@@ -86,6 +83,6 @@ class DMC (Model):
                     choicelist[n] = 0
                     rtlist[n] = t
 
-        return (np.arange(1, nTrials+1), choicelist, rtlist, congruence_list)
+        return (np.arange(1, nTrials+1), choicelist, rtlist, congruencylist)
     
     

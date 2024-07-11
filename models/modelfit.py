@@ -5,7 +5,7 @@ import pandas as pd
 from ._utilities import convertToDF, getRTData
 import seaborn as sns
 
-def fit(models, startingParticipants, endingParticipants, input_data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy, output_fileName, return_dataframes, posterior_predictive_check):
+def fit(models, startingParticipants, endingParticipants, input_data, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):
     if isinstance(input_data, str): 
         print("in path instance")
         input_data = getRTData(path=input_data, id=input_data_id, congruency=input_data_congruency, rt=input_data_rt, accuracy=input_data_accuracy)
