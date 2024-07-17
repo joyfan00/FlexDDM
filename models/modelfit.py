@@ -2,34 +2,40 @@ from .Model import Model
 import matplotlib.pyplot as plt
 import sys
 import pandas as pd
+from tqdm.notebook import tqdm
 from ._utilities import convertToDF, getRTData
 import seaborn as sns
 
 def fit(models, startingParticipants, endingParticipants, input_data, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):
     if isinstance(input_data, str): 
-        print("in path instance")
+        # print("in path instance")
         input_data = getRTData(path=input_data, id=input_data_id, congruency=input_data_congruency, rt=input_data_rt, accuracy=input_data_accuracy)
     dflist = []
     for model in models:
         df = pd.DataFrame(columns=['id'] + model.parameter_names + ['X^2', 'bic'])
-        for id in range(startingParticipants, endingParticipants + 1):
-            print("PARTICIPANT " + str(id))
+        if endingParticipants - startingParticipants > 1:
+            pbar = tqdm(range(startingParticipants, endingParticipants + 1))
+            pbar.set_description("Fitting Model to Data")
+        else:
+            pbar = range(startingParticipants, endingParticipants + 1)
+        for id in pbar:
+            # print("PARTICIPANT " + str(id))
             fitstat = sys.maxsize - 1
             fitstat2 = sys.maxsize
             pars = None
             runint = 1
             while fitstat != fitstat2:
-                print('run %s' % runint)
+                # print('run %s' % runint)
                 fitstat2 = fitstat
                 pars, fitstat = model.fit(model.modelsimulationfunction, input_data[input_data['id'] == id], pars, run=runint)
-                print(", ".join(str(x) for x in pars))
-                print(" X^2 = %s" % fitstat)
+                # print(", ".join(str(x) for x in pars))
+                # print(" X^2 = %s" % fitstat)
                 runint += 1
             quantiles_caf = [0.25, 0.5, 0.75]
             quantiles_cdf = [0.1, 0.3, 0.5, 0.7, 0.9]
             current_input = input_data[input_data['id'] == id]
             myprops = model.proportions(current_input, quantiles_cdf, quantiles_caf)
-            print(myprops)
+            # print(myprops)
             bic = Model.model_function(pars, myprops, model.param_number, model.parameter_names, model.modelsimulationfunction, current_input, model.bounds, final=True)
             df.loc[len(df)] = [id] + list(pars) + [fitstat, bic]
 

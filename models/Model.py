@@ -1,6 +1,7 @@
 # packages 
 import pandas as pd
 import numpy as np
+import numba as nb
 import sys
 import math
 from scipy.optimize import minimize
@@ -53,8 +54,8 @@ class Model:
             printstring = ''
             for i, x in enumerate(xk):
                 printstring += self.parameter_names[i] + ': ' + str(x) + '; '
-            print(printstring)
-            print(convergence)
+            # print(printstring)
+            # print(convergence)
 
         props = self.proportions(data, QUANTILES_CDF, QUANTILES_CAF)
         bounds_var = self.bounds
@@ -63,14 +64,13 @@ class Model:
                         method='Nelder-Mead')
         else:
             fit = differential_evolution(Model.model_function, bounds=bounds_var, x0=params,
-                                    args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=50, seed=10,
-                                    disp=True, popsize=10, polish=True, callback=printCurrentIteration, workers=1)
+                                    args=(props,self.param_number,self.parameter_names, function, data, bounds_var), maxiter=100, seed=10,
+                                    disp=True, popsize=8, polish=True, callback=printCurrentIteration, workers=-1)
             # popsize = 100, maxiter = 1000
         bestparams = fit.x
         fitstat = fit.fun
         return bestparams, fitstat
 
-    @staticmethod
     def model_function(x, props, param_number, parameter_names, function, data, bounds, final=False):
 
         """
@@ -228,12 +228,10 @@ class Model:
             for i, q in enumerate([q * 100 for q in QUANTILES_CAF]):
                 if i == 0:
                     temp_q = temp[temp['rt'] <= cafs[i]]
-                    # print("temp q length: ", len(temp_q), "i: ", i)
                     meanrtlist.append([np.mean(temp_q['rt'])])
                     acclist.append([np.mean(temp_q['accuracy'])])
                 else:
                     temp_q = temp[temp['rt'] <= cafs[i]].loc[temp['rt'] > cafs[i-1]]
-                    # print("temp_q length: ", len(temp_q), "i: ", i)
                     meanrtlist[k].append(np.mean(temp_q['rt']))
                     acclist[k].append(np.mean(temp_q['accuracy']))
             temp_q = temp[temp['rt'] > cafs[-1]]
@@ -245,11 +243,9 @@ class Model:
         group_cdf_quantiles = list(pd.DataFrame(cdfslist).mean())
         if np.isnan(group_cdf_quantiles[0]) == True:
             group_cdf_quantiles = [0] * len(QUANTILES_CDF)
-        print("group cdf quantiles: ", group_cdf_quantiles)
         group_caf_cutoffs = list(pd.DataFrame(cafcutofflist).mean())
         if np.isnan(group_caf_cutoffs[0]) == True:
             group_caf_cutoffs = [0] * len(QUANTILES_CAF)
-        print("group caf cutoffs: ", group_caf_cutoffs)
         return group_caf_quantiles, group_cdf_quantiles, group_caf_cutoffs
     
   

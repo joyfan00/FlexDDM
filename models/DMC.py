@@ -15,9 +15,9 @@ class DMC (Model):
     global data
     parameter_names = ['alpha', 'beta', 'mu_c', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
 
-    DT = 0.001
+    DT = 0.01
     VAR = 0.1
-    NTRIALS = 1000
+    NTRIALS = 100
     NOISESEED = 50
 
     def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
@@ -58,7 +58,7 @@ class DMC (Model):
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
         np.random.seed(noiseseed)
-        update_jitter = np.random.normal(loc=0, scale=var, size=10000)
+        update_jitter = np.random.normal(loc=0, scale=var, size=1000)
 
         # Creates congruency list with first half of trials being congruent and the following being incongruent
         congruencylist = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)
@@ -69,10 +69,10 @@ class DMC (Model):
             np.random.seed(n)
             while (evidence < alpha/2 and evidence > -alpha/2): # keep accumulating evidence until you reach a threshold
                 if congruencylist[n] == 'congruent':
-                    delta = (-peak_amplitude * np.exp(-(t / characteristic_time)) *
+                    delta = (peak_amplitude * np.exp(-(t / characteristic_time)) *
                             np.power(((t * np.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / t) - (1 / characteristic_time))) + mu_c
                 else:
-                    delta = (peak_amplitude * np.exp(-(t / characteristic_time)) *
+                    delta = (-peak_amplitude * np.exp(-(t / characteristic_time)) *
                             np.power(((t * np.exp(1)) / ((shape - 1) * characteristic_time)), (shape - 1)) * (((shape - 1) / t) - (1 / characteristic_time))) + mu_c
                 evidence += delta*dt + np.random.choice(update_jitter)
                 t += dt # increment time by the unit dt

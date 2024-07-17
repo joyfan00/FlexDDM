@@ -5,6 +5,7 @@ import sys
 from models import modelfit
 import pandas as pd
 import seaborn as sns
+from tqdm.notebook import tqdm
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 from ._utilities import convertToDF
@@ -21,9 +22,9 @@ def model_recovery(models, num_simulations=50):
                     initial_params = []
                     for lower_bound, upper_bound in model.bounds:
                         initial_params.append(np.random.uniform(lower_bound, upper_bound))
-                    print("init params: ", initial_params)
+                    # print("init params: ", initial_params)
                     simulation_data = pd.concat([simulation_data, convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), x)])
-                    print("sim data: \n", simulation_data)
+                    # print("sim data: \n", simulation_data)
                     broken = False
                 except:
                     broken = True
@@ -80,7 +81,9 @@ def param_recovery(models, num_simulations=50):
     for model in models:
         generated_params = []
         fit_params_list = []
-        for x in range(num_simulations): 
+        pbar = tqdm(range(num_simulations))
+        pbar.set_description("Simulating Parameter Values")
+        for x in pbar: 
             np.random.seed(x)
             broken = True
             while broken:
@@ -91,14 +94,14 @@ def param_recovery(models, num_simulations=50):
                     for lower_bound, upper_bound in model.bounds:
                         initial_params.append(np.random.uniform(lower_bound, upper_bound))
                     generated_params.append(initial_params)
-                    print("init params: ", initial_params)
+                    # print("init params: ", initial_params)
                     # creating a giant dataframe with the data from one singular model 
                     simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), 0)
-                    print("sim data: \n", simulation_data)
-                    fit_data = modelfit.fit(models, 0, 0, simulation_data, return_dataframes = True, posterior_predictive_check=False, fileName='output' + str(counter) + '.csv')
+                    # print("sim data: \n", simulation_data)
+                    fit_data = modelfit.fit([model], 0, 0, simulation_data, return_dataframes = True, posterior_predictive_check=False, output_fileName='output' + str(counter) + '.csv')
                     fit_data = fit_data[0]
-                    print(fit_data)
-                    print(type(fit_data))
+                    # print(fit_data)
+                    # print(type(fit_data))
                     fit_data = fit_data.drop(columns=['id', 'X^2', 'bic'])
                     fit_data = fit_data.reset_index(drop=True)
                     fit_data = fit_data.iloc[0].tolist()
@@ -109,8 +112,8 @@ def param_recovery(models, num_simulations=50):
                     print("FITTING CANNOT OCCUR")
                     broken = True
         
-        print(fit_params_list)
-        print(generated_params)
+        # print(fit_params_list)
+        # print(generated_params)
         correlation_values = []
         sig_values = []
 
