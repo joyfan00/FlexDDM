@@ -23,7 +23,7 @@ def model_recovery(models, num_simulations=50):
                     for lower_bound, upper_bound in model.bounds:
                         initial_params.append(np.random.uniform(lower_bound, upper_bound))
                     # print("init params: ", initial_params)
-                    simulation_data = pd.concat([simulation_data, convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), x)])
+                    simulation_data = pd.concat([simulation_data, convertToDF(model.modelsimulationfunction(*initial_params, nTrials=100), x)])
                     # print("sim data: \n", simulation_data)
                     broken = False
                 except:
@@ -96,7 +96,7 @@ def param_recovery(models, num_simulations=50):
                     generated_params.append(initial_params)
                     # print("init params: ", initial_params)
                     # creating a giant dataframe with the data from one singular model 
-                    simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=300), 0)
+                    simulation_data = convertToDF(model.modelsimulationfunction(*initial_params, nTrials=100), 0)
                     # print("sim data: \n", simulation_data)
                     fit_data = modelfit.fit([model], 0, 0, simulation_data, return_dataframes = True, posterior_predictive_check=False, output_fileName='output' + str(counter) + '.csv')
                     fit_data = fit_data[0]

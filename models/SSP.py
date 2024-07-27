@@ -16,9 +16,9 @@ class SSP(Model):
     global data
     parameter_names = ['alpha', 'beta', 'p', 'sd_0', 'sd_r', 'tau']
     
-    DT = 0.001 # NORMAL: 0.01
-    VAR = 0.1
-    NTRIALS = 1000
+    DT = 0.01 # NORMAL: 0.01
+    VAR = 0.01 # NORMAL: 0.01
+    NTRIALS = 100
     NOISESEED = 50
 
     def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
@@ -31,9 +31,9 @@ class SSP(Model):
                 self.data = util.getRTData(data,input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0.07, 0.19),(0.15, 0.45),(0.2, 0.55),(1,2.6),(0.01,0.026),(0,min(self.data['rt']))]
+            self.bounds = [(0.07, 0.19),(0,1),(0.2, 0.55),(0.1, 2.6),(0.01, 0.026),(0.15, min(self.data['rt']))]
         else: 
-            self.bounds = [(0.07, 0.19),(0.15, 0.45),(0.2, 0.55),(1,2.6),(0.01,0.026),(0,5)]
+            self.bounds = [(0.01, 0.19),(0,1),(0.2, 0.55),(0.1, 2.6),(0.01, 0.026),(0.15, 0.45)]
 
 
         super().__init__(self.param_number, self.bounds, self.parameter_names)
@@ -60,7 +60,9 @@ class SSP(Model):
         congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
         np.random.seed(noiseseed)
 
-        noise = np.random.normal(loc=0, scale=.01, size=10000)
+        # beta = 0.5
+
+        noise = np.random.normal(loc=0, scale=var, size=10000)
         for n in np.arange(0, nTrials):
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta*alpha/2 - (1-beta)*alpha/2 # start our evidence at initial-bias beta

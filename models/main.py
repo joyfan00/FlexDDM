@@ -8,7 +8,7 @@ from ._utilities import convertToDF
 import seaborn as sns
 
 # function that performs model recovery and parameter recovery 
-def validation(models, model_recovery=True, model_recovery_simulations=50, parameter_recovery=True, param_recovery_simulations=50):
+def validation(models, model_recovery=True, model_recovery_simulations=100, parameter_recovery=True, param_recovery_simulations=100):
     if model_recovery:
         validationtools.model_recovery(models, model_recovery_simulations)
     if parameter_recovery:

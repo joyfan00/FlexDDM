@@ -25,7 +25,7 @@ class Model:
     global parameter_names
 
     global NTRIALS
-    NTRIALS = 1000
+    NTRIALS = 100
     global QUANTILES_CDF 
     QUANTILES_CDF = [.10, .30, .50, .70, .90]
     global QUANTILES_CAF

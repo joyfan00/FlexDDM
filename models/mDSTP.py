@@ -9,12 +9,12 @@ from models import _utilities as util
 Class to simulate data according to the Dual Stage Two Phase model (DSTP) 
 """
 
-class DSTP(Model):
+class mDSTP(Model):
 
     global data
     param_number = 9
     global bounds
-    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
+    parameter_names = ['alphaSS', 'betaSS', 'etaSS', 'alphaRS', 'betaRS', 'etaS1', 'etaS2', 'eta_r', 'tau']
     DT = 0.01
     VAR = 0.01
     NTRIALS = 100
@@ -24,7 +24,7 @@ class DSTP(Model):
         """
         Initializes a DSTP model object. 
         """
-        self.modelsimulationfunction = DSTP.model_simulation
+        self.modelsimulationfunction = mDSTP.model_simulation
 
         if data != None:
             if isinstance(data, str): 
@@ -38,7 +38,7 @@ class DSTP(Model):
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
     @nb.jit(nopython=False, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS, delta_target, delta_flanker, deltaRS, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
+    def model_simulation(alphaSS, betaSS, etaSS, alphaRS, betaRS, etaS1, etaS2, eta_r, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):
         """
         Performs simulations for DSTP model.
         @alphaSS (float): boundary separation for stimulus selection phase
@@ -56,10 +56,19 @@ class DSTP(Model):
         @noiseseed (int): random seed for noise consistency
         """
 
+        deltaSS = 0.4
+        delta_target = 0.1
+        delta_flanker = 0.15
+        deltaRS = 0.8
+
         choicelist = [np.nan]*nTrials
         rtlist = [np.nan]*nTrials
         np.random.seed(noiseseed)
         update_jitter = np.random.normal(loc=0, scale=var, size=10000)
+        update_jitter_SS = update_jitter * (10**etaSS)
+        update_jitter_RS1 = update_jitter * (10**etaS1)
+        update_jitter_RS2 = update_jitter * (10**etaS2)
+
         congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
         for n in np.arange(0, nTrials):
             if congruencylist[n] == 'congruent':
@@ -71,8 +80,12 @@ class DSTP(Model):
             evidenceRS1 = betaRS*alphaRS/2 - (1-betaRS)*alphaRS/2
             np.random.seed(n)
             while (evidenceSS < alphaSS/2 and evidenceSS > -alphaSS/2) or (evidenceRS1 < alphaRS/2 and evidenceRS1 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
-                evidenceSS += deltaSS*dt + np.random.choice(update_jitter) # add one of the many possible updates to evidence
-                evidenceRS1 += deltaRS1*dt + np.random.choice(update_jitter)
+                delta_noise_SS = np.random.choice(update_jitter_SS)
+                delta_noise_RS1 = np.random.choice(update_jitter_RS1)
+                delta_noise_SS = delta_noise_SS*(np.exp(-1*(eta_r/2)*((t-tau))))
+                delta_noise_RS1 = delta_noise_RS1*(np.exp(-1*(eta_r/2)*((t-tau))))
+                evidenceSS += deltaSS*dt + delta_noise_SS # add one of the many possible updates to evidence
+                evidenceRS1 += deltaRS1*dt + delta_noise_RS1
                 t += dt # increment time by the unit dt
             if evidenceRS1 > alphaRS/2:
                 choicelist[n] = 1 # choose the upper threshold action
@@ -89,7 +102,9 @@ class DSTP(Model):
                     deltaRS = -1 * deltaRS
                 evidenceRS2 = evidenceRS1 # start where you left off from RS1
                 while (evidenceRS2 < alphaRS/2 and evidenceRS2 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
-                    evidenceRS2 += deltaRS*dt + np.random.choice(update_jitter)
+                    delta_noise_RS2 = np.random.choice(update_jitter_RS2)
+                    delta_noise_RS2 = delta_noise_RS2*(np.exp(-1*(eta_r/2)*((t-tau))))
+                    evidenceRS2 += deltaRS*dt + delta_noise_RS2
                     t += dt # increment time by the unit dt
                 if evidenceRS2 > alphaRS/2:
                     choicelist[n] = 1 # choose the upper threshold action
