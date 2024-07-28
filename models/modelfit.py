@@ -37,6 +37,7 @@ def fit(models, startingParticipants, endingParticipants, input_data, input_data
             myprops = model.proportions(current_input, quantiles_cdf, quantiles_caf)
             # print(myprops)
             bic = Model.model_function(pars, myprops, model.param_number, model.parameter_names, model.modelsimulationfunction, current_input, model.bounds, final=True)
+            print('BIC = ',bic)
             df.loc[len(df)] = [id] + list(pars) + [fitstat, bic]
 
             if posterior_predictive_check:

@@ -8,12 +8,12 @@ from models import _utilities as util
 Class to simulate data according to the Diffusion Model for Conlict (DMC) 
 """
 
-class mDMC (Model):
+class mDMCfs (Model):
 
-    param_number = 8
+    param_number = 7
     global bounds
     global data
-    parameter_names = ['alpha', 'beta', 'eta', 'eta_r', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
+    parameter_names = ['alpha', 'beta', 'eta', 'eta_r', 'characteristic_time', 'peak_amplitude', 'tau']
 
     DT = 0.01
     VAR = 0.01
@@ -24,22 +24,22 @@ class mDMC (Model):
         """
         Initializes a DMC model object. 
         """
-        self.modelsimulationfunction = mDMC.model_simulation
+        self.modelsimulationfunction = mDMCfs.model_simulation
 
         if data != None:
             if isinstance(data, str): 
                 self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0.07,0.38),(0,1),(-1, 1),(-5, 5),(1.5,4.5),(0.01,1),(0.015,0.4),(0.15,min(self.data['rt']))]
+            self.bounds = [(0.07,0.38),(0,1),(-1, 1),(-5, 5),(0.01,1),(0.015,0.4),(0.15,min(self.data['rt']))]
         else: 
-            self.bounds = [(0.07,0.38),(0,1),(-1, 1),(-5, 5),(1.5,4.5),(0.01,1),(0.015,0.4),(0.15,0.45)]
+            self.bounds = [(0.07,0.38),(0,1),(-1, 1),(-5, 5),(0.01,1),(0.015,0.4),(0.15,0.45)]
 
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
-    def model_simulation(alpha, beta, eta, eta_r, shape, characteristic_time, peak_amplitude, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED,):
+    def model_simulation(alpha, beta, eta, eta_r, characteristic_time, peak_amplitude, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED,):
         """
         Performs simulations for DMC model. 
         @alpha (float): boundary separation
@@ -62,7 +62,7 @@ class mDMC (Model):
         update_jitter = update_jitter * (10**eta)
 
         mu_c = 0.5
-        # shape = 2
+        shape = 2
 
         # Creates congruency list with first half of trials being congruent and the following being incongruent
         congruencylist = ['congruent'] * (nTrials // 2) + ['incongruent'] * (nTrials // 2)

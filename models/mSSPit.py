@@ -19,7 +19,7 @@ class mSSPit(Model):
     DT = 0.01 # NORMAL: 0.01
     VAR = 0.01
     NTRIALS = 100
-    NOISESEED = 50
+    NOISESEED = 51 # NORMAL: 50
 
     def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """

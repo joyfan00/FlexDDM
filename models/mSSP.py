@@ -19,7 +19,7 @@ class mSSP(Model):
     DT = 0.01 # NORMAL: 0.01
     VAR = 0.01
     NTRIALS = 100
-    NOISESEED = 50
+    NOISESEED = 50 # NORMAL: 50
 
     def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """
@@ -31,9 +31,9 @@ class mSSP(Model):
                 self.data = util.getRTData(data,input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0.07, 0.29),(0,1),(-1, 1),(-5, 5),(1, 2.6),(0.01, 0.026),(0.15, min(self.data['rt']))]
+            self.bounds = [(0.07, 0.19),(0,1),(-1, 1),(-5, 5),(0.1, 2.6),(0.01, 0.026),(0.15, min(self.data['rt']))]
         else: 
-            self.bounds = [(0.07, 0.29),(0,1),(-1, 1),(-5, 5),(1, 2.6),(0.01, 0.026),(0.15, 0.45)]
+            self.bounds = [(0.07, 0.19),(0,1),(-1, 1),(-5, 5),(0.1, 2.6),(0.01, 0.026),(0.15, 0.45)]
 
 
         super().__init__(self.param_number, self.bounds, self.parameter_names)

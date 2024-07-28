@@ -31,9 +31,9 @@ class DMC (Model):
                 self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0.07,0.38),(0,1),(0.2,0.8),(1.5,4.5),(0.02,0.12),(0.015,0.4),(0.15,min(self.data['rt']))]
+            self.bounds = [(0.07,0.38),(0,1),(0.2,0.8),(1.5,4.5),(0.01,1),(0.015,0.4),(0.15,min(self.data['rt']))]
         else: 
-            self.bounds = [(0.07,0.38),(0,1),(0.2,0.8),(1.5,4.5),(0.02,0.12),(0.015,0.4),(0.15,0.45)]
+            self.bounds = [(0.07,0.38),(0,1),(0.2,0.8),(1.5,4.5),(0.01,1),(0.015,0.4),(0.15,0.45)]
 
         super().__init__(self.param_number, self.bounds, self.parameter_names)
 
