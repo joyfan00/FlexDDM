@@ -88,6 +88,9 @@ def fit(models, startingParticipants, endingParticipants, input_data, input_data
                 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the title
                 fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=1, bbox_transform=fig.transFigure, fontsize='x-small', frameon=False)
                 plt.show()
+                
+            if not return_dataframes:
+                df.to_csv(model.__class__.__name__ + '_' + output_fileName, index=False)
 
         if return_dataframes:
             dflist.append(df)
