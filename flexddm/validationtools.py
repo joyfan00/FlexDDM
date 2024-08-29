@@ -60,7 +60,8 @@ def model_recovery(models, num_simulations=50):
     plt.figure(figsize=(10, 8))  
     heatmap = sns.heatmap(probabilities_df, cmap='crest', annot=True, fmt=".2f", linewidths=.5,
                         xticklabels=[model.__class__.__name__ for model in models],
-                        yticklabels=[model.__class__.__name__ for model in models])
+                        yticklabels=[model.__class__.__name__ for model in models],
+                        vmin=0, vmax=1)
 
     heatmap.xaxis.tick_bottom()
 
