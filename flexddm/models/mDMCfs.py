@@ -14,6 +14,7 @@ class mDMCfs (Model):
     global bounds
     global data
     parameter_names = ['alpha', 'beta', 'eta', 'eta_r', 'characteristic_time', 'peak_amplitude', 'tau']
+    param_number = len(parameter_names)
 
     DT = 0.01
     VAR = 0.01

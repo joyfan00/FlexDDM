@@ -11,10 +11,10 @@ Class to simulate data according to the Shrinking Spotlight Model (SSP)
 
 class mSSP(Model):
 
-    param_number = 7
     global bounds
     global data
     parameter_names = ['alpha', 'beta', 'eta', 'eta_r', 'sd_0', 'sd_r', 'tau']
+    param_number = len(parameter_names)
     
     DT = 0.01 # NORMAL: 0.01
     VAR = 0.01

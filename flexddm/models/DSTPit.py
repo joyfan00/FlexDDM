@@ -15,6 +15,7 @@ class DSTPit(Model):
     param_number = 8
     global bounds
     parameter_names = ['alphaSS', 'betaSS', 'delta_flanker_deltaSS_ratio', 'alphaRS', 'betaRS', 'delta_target', 'deltaRS', 'tau']
+    param_number = len(parameter_names)
     DT = 0.01
     VAR = 0.01
     NTRIALS = 100

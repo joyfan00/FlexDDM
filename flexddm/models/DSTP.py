@@ -12,9 +12,10 @@ Class to simulate data according to the Dual Stage Two Phase model (DSTP)
 class DSTP(Model):
 
     global data
-    param_number = 9
     global bounds
     parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
+    param_number = len(parameter_names)
+    
     DT = 0.01
     VAR = 0.01
     NTRIALS = 100

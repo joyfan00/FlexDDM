@@ -10,10 +10,10 @@ Class to simulate data according to the Diffusion Model for Conlict (DMC)
 
 class DMCfs (Model):
 
-    param_number = 5
     global bounds
     global data
     parameter_names = ['alpha', 'beta', 'mu_c', 'characteristic_time', 'peak_amplitude', 'tau']
+    param_number = len(parameter_names)
 
     DT = 0.01
     VAR = 0.01

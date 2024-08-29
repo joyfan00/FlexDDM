@@ -11,10 +11,10 @@ Class to simulate data according to the Shrinking Spotlight Model with interfere
 
 class SSPit(Model):
 
-    param_number = 5
     global bounds
     global data
     parameter_names = ['alpha', 'beta', 'p', 'sd_0_sd_r_ratio', 'tau']
+    param_number = len(parameter_names)
     
     DT = 0.01 # NORMAL: 0.01
     VAR = 0.01
