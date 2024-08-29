@@ -6,10 +6,15 @@ from tqdm.notebook import tqdm
 from ._utilities import convertToDF, getRTData
 import seaborn as sns
 
-def fit(models, startingParticipants, endingParticipants, input_data, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):
+def fit(models, input_data, startingParticipants=None, endingParticipants=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):   
     if isinstance(input_data, str): 
         # print("in path instance")
         input_data = getRTData(path=input_data, id=input_data_id, congruency=input_data_congruency, rt=input_data_rt, accuracy=input_data_accuracy)
+   
+    if startingParticipants==None and endingParticipants==None:
+        startingParticipants = input_data['id'].min()
+        endingParticipants = input_data['id'].max()
+
     dflist = []
     for model in models:
         df = pd.DataFrame(columns=['id'] + model.parameter_names + ['X^2', 'bic'])
