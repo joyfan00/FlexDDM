@@ -13,30 +13,45 @@ class SSPit(Model):
 
     global bounds
     global data
-    parameter_names = ['alpha', 'beta', 'p', 'sd_0_sd_r_ratio', 'tau']
-    param_number = len(parameter_names)
+    global parameter_names
+    global param_number
     
-    DT = 0.01 # NORMAL: 0.01
+    DT = 0.01  # NORMAL: 0.01
     VAR = 0.01
     NTRIALS = 100
     NOISESEED = 50
 
     def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """
-        Initializes a SSP model object. 
+        Initializes an SSPit model object.
         """
         self.modelsimulationfunction = SSPit.model_simulation
-        if data != None:
-            if isinstance(data, str): 
-                self.data = util.getRTData(data,input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
+
+        if data is not None:
+            if isinstance(data, str):
+                self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0.07, 0.19),(0,1),(0.2, 0.55),(0.01, 100),(0.15,min(self.data['rt']))]
-        else: 
-            self.bounds = [(0.07, 0.19),(0,1),(0.2, 0.55),(0.01, 100),(0.15,0.45)]
+            self.bounds = {
+                "alpha": (0.07, 0.19),
+                "beta": (0, 1),
+                "p": (0.2, 0.55),
+                "sd_0_sd_r_ratio": (0.01, 100),
+                "tau": (0.15, min(self.data['rt']))
+            }
+        else:
+            self.bounds = {
+                "alpha": (0.07, 0.19),
+                "beta": (0, 1),
+                "p": (0.2, 0.55),
+                "sd_0_sd_r_ratio": (0.01, 100),
+                "tau": (0.15, 0.45)
+            }
+        
+        self.parameter_names = list(self.bounds.keys())
+        self.param_number = len(self.parameter_names)
 
-
-        super().__init__(self.param_number, self.bounds, self.parameter_names)
+        super().__init__(self.param_number, list(self.bounds.values()), self.parameter_names)
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alpha, beta, p, sd_0_sd_r_ratio, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):

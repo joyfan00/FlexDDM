@@ -13,8 +13,8 @@ class DSTP(Model):
 
     global data
     global bounds
-    parameter_names = ['alphaSS', 'betaSS', 'deltaSS', 'alphaRS', 'betaRS', 'delta_target', 'delta_flanker', 'deltaRS', 'tau']
-    param_number = len(parameter_names)
+    global parameter_names
+    global param_number
     
     DT = 0.01
     VAR = 0.01
@@ -23,20 +23,43 @@ class DSTP(Model):
 
     def __init__(self, data=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct"):
         """
-        Initializes a DSTP model object. 
+        Initializes a DSTP model object.
         """
         self.modelsimulationfunction = DSTP.model_simulation
 
-        if data != None:
-            if isinstance(data, str): 
+        if data is not None:
+            if isinstance(data, str):
                 self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0,14,0.38),(0,1),(0.25,0.55),(0.14,0.38),(0,1),(0.05,0.15),(0.05,0.25),(0.4,1.2),(0.15,min(self.data['rt']))]
-        else: 
-            self.bounds = [(0.14,0.38),(0,1),(0.25,0.55),(0.14,0.38),(0,1),(0.05,0.15),(0.05,0.25),(0.4,1.2),(0.15,0.45)]
-            
-        super().__init__(self.param_number, self.bounds, self.parameter_names)
+            self.bounds = {
+                "alphaSS": (0.14, 0.38),
+                "betaSS": (0, 1),
+                "deltaSS": (0.25, 0.55),
+                "alphaRS": (0.14, 0.38),
+                "betaRS": (0, 1),
+                "delta_target": (0.05, 0.15),
+                "delta_flanker": (0.05, 0.25),
+                "deltaRS": (0.4, 1.2),
+                "tau": (0.15, min(self.data['rt']))
+            }
+        else:
+            self.bounds = {
+                "alphaSS": (0.14, 0.38),
+                "betaSS": (0, 1),
+                "deltaSS": (0.25, 0.55),
+                "alphaRS": (0.14, 0.38),
+                "betaRS": (0, 1),
+                "delta_target": (0.05, 0.15),
+                "delta_flanker": (0.05, 0.25),
+                "deltaRS": (0.4, 1.2),
+                "tau": (0.15, 0.45)
+            }
+        
+        self.parameter_names = list(self.bounds.keys())
+        self.param_number = len(self.parameter_names)
+
+        super().__init__(self.param_number, list(self.bounds.values()), self.parameter_names)
 
     @nb.jit(nopython=False, cache=True, parallel=False, fastmath=True, nogil=True)
     def model_simulation(alphaSS, betaSS, deltaSS, alphaRS, betaRS, delta_target, delta_flanker, deltaRS, tau, dt=DT, var=VAR, nTrials=NTRIALS, noiseseed=NOISESEED):

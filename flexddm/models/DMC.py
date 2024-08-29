@@ -12,8 +12,8 @@ class DMC (Model):
 
     global bounds
     global data
-    parameter_names = ['alpha', 'beta', 'mu_c', 'shape', 'characteristic_time', 'peak_amplitude', 'tau']
-    param_number = len(parameter_names)
+    global parameter_names 
+    global param_number
 
     DT = 0.01
     VAR = 0.01
@@ -31,11 +31,29 @@ class DMC (Model):
                 self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0.07,0.38),(0,1),(0.2,0.8),(1.5,4.5),(0.01,1),(0.015,0.4),(0.15,min(self.data['rt']))]
+            self.bounds = {
+                "alpha": (0.07,0.38), 
+                "beta": (0,1), 
+                "mu_c": (0.2,0.8), 
+                "shape": (1.5,4.5), 
+                "characteristic_time": (0.01,1), 
+                "peak_amplitude": (0.015,0.4), 
+                "tau": (0.15,min(self.data['rt']))
+            }
         else: 
-            self.bounds = [(0.07,0.38),(0,1),(0.2,0.8),(1.5,4.5),(0.01,1),(0.015,0.4),(0.15,0.45)]
+            self.bounds = {
+                "alpha": (0.07,0.38), 
+                "beta": (0,1), 
+                "mu_c": (0.2,0.8), 
+                "shape": (1.5,4.5), 
+                "characteristic_time": (0.01,1), 
+                "peak_amplitude": (0.015,0.4), 
+                "tau": (0.15,0.45)
+            }
+        self.parameter_names = list(self.bounds.keys())
+        self.param_number = len(self.parameter_names)
 
-        super().__init__(self.param_number, self.bounds, self.parameter_names)
+        super().__init__(self.param_number, list(self.bounds.values()), self.parameter_names)
 
 
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)

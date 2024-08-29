@@ -9,11 +9,12 @@ Class to simulate data according to the standard flanker drift diffusion model
 """
 
 class StandardDDM(Model):
+
     global bounds
     global data
-    parameter_names = ['alpha_c', 'alpha_i', 'beta', 'delta_c', 'delta_i', 'tau']
-    param_number = len(parameter_names)
-
+    global parameter_names
+    global param_number
+    
     DT = 0.01
     VAR = 0.1
     NTRIALS = 100
@@ -24,16 +25,34 @@ class StandardDDM(Model):
         Initializes a standard diffusion model object. 
         """
         self.modelsimulationfunction = StandardDDM.model_simulation
-        if data != None:
-            if isinstance(data, str): 
+
+        if data is not None:
+            if isinstance(data, str):
                 self.data = util.getRTData(data, input_data_id, input_data_congruency, input_data_rt, input_data_accuracy)
             else:
                 self.data = data
-            self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,min(self.data['rt']))]
-        else: 
-            self.bounds = [(0,20),(0,20),(0,1),(-10,10),(-10,10),(0,5)] 
-        
-        super().__init__(self.param_number, self.bounds, self.parameter_names)
+            self.bounds = {
+                "alpha_c": (0, 20),
+                "alpha_i": (0, 20),
+                "beta": (0, 1),
+                "delta_c": (-10, 10),
+                "delta_i": (-10, 10),
+                "tau": (0, min(self.data['rt']))
+            }
+        else:
+            self.bounds = {
+                "alpha_c": (0, 20),
+                "alpha_i": (0, 20),
+                "beta": (0, 1),
+                "delta_c": (-10, 10),
+                "delta_i": (-10, 10),
+                "tau": (0, 5)
+            }
+
+        self.parameter_names = list(self.bounds.keys())
+        self.param_number = len(self.parameter_names)
+
+        super().__init__(self.param_number, list(self.bounds.values()), self.parameter_names)
 
     # @staticmethod
     @nb.jit(nopython=True, cache=True, parallel=False, fastmath=True, nogil=True)
