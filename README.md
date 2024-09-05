@@ -355,12 +355,14 @@ for n in np.arange(0, nTrials):
 ```
 
 
-
-```
-About
------
-
-We developed FlexDDM to easily be able to implement new, theoretical models that utilized a customized fitting procedure. 
-
 References
-==========
+---
+- LaFollette, K., Fan, J., Puccio, A., & Demaree, H. A. (2024). FlexDDM: A flexible decision-diffusion Python package for the behavioral sciences. *Proceedings of the Annual Meeting of the Cognitive Science Society, 46*. Retrieved from [https://escholarship.org/uc/item/4q57r2x0](https://escholarship.org/uc/item/4q57r2x0)
+
+- LaFollette, K. J., *Fan, J., *Puccio, A., & Demaree, H. A. (Under Review). Democratizing diffusion decision models: A comprehensive tutorial on developing, validating, and fitting diffusion decision models in Python with FlexDDM. Retrieved from [https://doi.org/10.31234/osf.io/j9m67](https://doi.org/10.31234/osf.io/j9m67)
+
+- Ratcliff, R., & Smith, P. L. (2004). A comparison of sequential sampling models for two-choice reaction time. *Psychological Review*.
+- Ratcliff, R., & McKoon, G. (2016). Decision Diffusion Model: Current Issues and History. *Trends in Cognitive Science*.
+- White, C. N., Ratcliff, R., & Vasey, M. W. (2017). Testing the validity of conflict drift-diffusion models for use in estimating cognitive processes: A parameter-recovery study. *Psychonomic Bulletin & Review*.
+- Ahmad, I., Hamid, M., & Bakar, M. S. (2022). Differential Evolution: A Recent Review Based on State-of-the-Art Works. *Applied Soft Computing*.
+- Wang, Q., & Shoup, T. (2011). Parameter sensitivity study of the Nelder-Mead Simplex Method. *Advances in Engineering Software*.
