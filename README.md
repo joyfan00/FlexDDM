@@ -228,14 +228,14 @@ d = Dog('Macey', 'Golden Doodle', 'golden') # creates the object with the dog's 
 d.bark() # this will print out woof to the screen
 ```
 
-Now, let's get started with creating theoretical models for FlexDDM! The first step is to create a new Python file under the `FlexDDM/models` folder. Label the file the same name as your model. For our example, let's name the file `NewModel.py` because we will create a model called `NewModel`. 
+Now, let's get started with creating theoretical models for FlexDDM! The first step is to create a new Python file under the `flexddm/models` folder. Label the file the same name as your model. For our example, let's name the file `NewModel.py` because we will create a model called `NewModel`. 
 
 In our `NewModel.py` file, we want to import different libraries. Here is the list that you will need for our example: 
-
 ```py
 import numpy as np
 import numba as nb
 from .Model import Model
+from flexddm import _utilities as util
 ```
 
 The `numpy` library is a scientific computing library that allows for efficient calculation of mathematical and statistical operations. The `numba` library allows us to more efficiently run code. Python is what we call an interpreted language, which means that the computer has to first interpret the code and then run the code, which can be a tedious process. However, there are what are called compiled languages, which the computer can run directly, which makes the code run faster. `numba` allows the Python code to be converted from an interpreted language to a compiled language. Anytime you also see the `import _____ as __`, when utilize the library's function in your code, make sure to use the abbreviated version for ease of use (i.e. use np for numpy and nb for numba). The line `from .Model import Model` imports the base Model class that we will talk about in the next paragraph. 
@@ -251,7 +251,7 @@ Afterwards, we define global variables, which are places to store information th
 * **bounds**: the bound values of each of the parameters
 * **parameter_names**: a list of the parameter names
 * **DT**: the change in time to simulated data for 
-* **VAR**: variance (NEED TO EXPAND)
+* **VAR**: standard deviation of the diffusion process
 * **NTRIALS**: the number of trials for simulated data 
 * **NOISESEED**: the seed of randomization to help with data selection 
 
@@ -345,13 +345,57 @@ Another key variable we initialize is our congruencylist.
 ```py
 congruencylist = ['congruent']*int(nTrials//2) + ['incongruent']*int(nTrials//2) 
 ```
-Due to the fact that we assume that there are equal congruent and incongruent trials, we just divide incongruent and congruent trials. Lastly, we set a seed and sample 
+Due to the fact that we assume that there are equal congruent and incongruent trials, we just divide incongruent and congruent trials. Lastly, we set a seed for reproducibility of results and sample 10000 points of normal distribution. We need the seed because it helps to make sure the fitting process is happening accurately and does not introduce any randomness between iterations in the optimization algorithm. 
 ```py
 np.random.seed(noiseseed)
+updates = np.random.normal(loc=0, scale=var, size=10000)
 ```
-Then, 
+Then, we iterate through each of the trials to simulate a choice and response time for that trial. 
 ```py
 for n in np.arange(0, nTrials):
+```
+In each trial, we execute the following process. 
+
+We check the congruency of the trial because we want to utilize a different alpha and delta depending on the congruency. In this case, we set the `alpha` for congruent trials to be `alpha_c`, `delta` for congruent trials to be `delta_c`, `alpha` for incongruent trials to be `alpha_i`, and `delta` for incongruent trials to be `delta_i`. 
+```py
+if congruencylist[n] == 'congruent':
+   alpha = alpha_c
+   delta = delta_c
+else:
+   alpha = alpha_i
+   delta = delta_i
+```
+
+Before diffusion begins, we want to define the time it starts and relative evidence for each choice. We initialize starting time `t` at `tau`, which represents the non-decision time. We want to account for the total amount of time for this entire process including non-decision time, not just the time that diffusion takes. Also, we initialize `evidence` to be `beta * alpha/2 - (1-beta) * alpha/2`. It determines the initial evidence in a decision-diffusion model by adjusting for starting point bias. It does this by taking half of the boundary separation (α) and weighting it based on the starting point bias (β) and its complement (1-β). The result represents how the starting point bias affects the initial evidence in favor of one decision over the other.
+```py
+t = tau # start the accumulation process at non-decision time tau
+evidence = beta * alpha/2 - (1 - beta) * alpha/2 # start our evidence at initial-bias beta
+```
+
+To reproduce the results for each particular trial, we utilize a different seed for each trial to sample a unique set of values for updates but consistently across iterations of the optimization algorithm. 
+```py
+np.random.seed(n)
+```
+
+We then accumulate evidence by the average rate `delta` scaled by the time increment `dt` and adding some noise sampled from `updates`. We also increase time by the time increment `dt`. This process continues until evidence passes one of the thresholds. 
+```py
+while evidence < alpha/2 and evidence > -alpha/2: # keep accumulating evidence until you reach a threshold
+      evidence += delta*dt + np.random.choice(updates) # add one of the many possible updates to evidence
+      t += dt # increment time by the unit dt
+```
+
+Once the evidence accumulation process completes and reaches a threshold, we then check which threshold was crossed. If it crosses the higher threshold, we record 1 in `choicelist` at the specific trial number index, otherwise we record 0. Additionally, we track the current time `t` in `rtlist` at the specific trial number index. 
+```py
+if evidence > alpha/2:
+   choicelist[n] = 1 # choose the upper threshold action
+else:
+   choicelist[n] = 0  # choose the lower threshold action
+rtlist[n] = t
+```
+
+That concludes the process in the for loop that iterates through each trial. Once the evidence accumulation process for each trial has been complete, we now return the trial number, choice, RT, and congruency for each simulated trial. 
+```py
+return (np.arange(1, nTrials+1), choicelist, rtlist, congruencylist)
 ```
 
 
@@ -359,7 +403,7 @@ References
 ---
 - LaFollette, K., Fan, J., Puccio, A., & Demaree, H. A. (2024). FlexDDM: A flexible decision-diffusion Python package for the behavioral sciences. *Proceedings of the Annual Meeting of the Cognitive Science Society, 46*. Retrieved from [https://escholarship.org/uc/item/4q57r2x0](https://escholarship.org/uc/item/4q57r2x0)
 
-- LaFollette, K. J., *Fan, J., *Puccio, A., & Demaree, H. A. (Under Review). Democratizing diffusion decision models: A comprehensive tutorial on developing, validating, and fitting diffusion decision models in Python with FlexDDM. Retrieved from [https://doi.org/10.31234/osf.io/j9m67](https://doi.org/10.31234/osf.io/j9m67)
+- LaFollette, K. J., Fan, J., Puccio, A., & Demaree, H. A. (Under Review). Democratizing diffusion decision models: A comprehensive tutorial on developing, validating, and fitting diffusion decision models in Python with FlexDDM. Retrieved from [https://doi.org/10.31234/osf.io/j9m67](https://doi.org/10.31234/osf.io/j9m67)
 
 - Ratcliff, R., & Smith, P. L. (2004). A comparison of sequential sampling models for two-choice reaction time. *Psychological Review*.
 - Ratcliff, R., & McKoon, G. (2016). Decision Diffusion Model: Current Issues and History. *Trends in Cognitive Science*.
