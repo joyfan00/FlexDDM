@@ -85,7 +85,7 @@ class StandardDDM(Model):
             t = tau # start the accumulation process at non-decision time tau
             evidence = beta*alpha/2 - (1-beta)*alpha/2 # start our evidence at initial-bias beta
             np.random.seed(n)
-            while evidence < alpha and evidence > -alpha: # keep accumulating evidence until you reach a threshold
+            while evidence < alpha/2 and evidence > -alpha/2: # keep accumulating evidence until you reach a threshold
                 evidence += delta*dt + np.random.choice(updates) # add one of the many possible updates to evidence
                 t += dt # increment time by the unit dt
             if evidence > alpha:
