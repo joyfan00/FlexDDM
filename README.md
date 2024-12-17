@@ -11,20 +11,20 @@ Installation Guide
 
 #### Installation
 
-Make sure to download Git to your laptop. Here are resources to be able to download Git: https://git-scm.com/downloads. Use the following git command to download the repository onto your laptop. 
+Make sure to download Git to your laptop. Here are resources to be able to [download Git](https://git-scm.com/downloads). Use the following git command to download the repository onto your laptop. 
 
 ``` shell
 git clone https://github.com/joyfan00/FlexDDM.git
 ```
 
 #### Python
-FlexDDM is a Python-based package. It uses Python version 3.11.6. Here is the link to download: <https://www.python.org/downloads/release/python-3118/>. Download the correct version according to your machine. 
+FlexDDM is a Python-based package. It uses Python version 3.12.0. The link to download is [here](https://www.python.org/downloads/release/python-3120/). Download the correct version according to your machine. 
 
 #### Anaconda Environment
 
 FlexDDM uses many built in Python libraries to allow for greater efficiency and accessibility. We recommend creating an Anaconda environment to allow for you to utilize the exact specifications that are necessary for the FlexDDM package. 
 
-To download Anaconda, please utilize the following link: <https://www.anaconda.com/download>. 
+To download Anaconda, please utilize the following [link](https://www.anaconda.com/download). 
 
 After you download Anaconda, we have a list of the requirements that are necessary to run FlexDDM in the text file `requirements.txt`. To install them, use the following pip command: 
 
@@ -32,7 +32,7 @@ After you download Anaconda, we have a list of the requirements that are necessa
 pip install -r requirements.txt
 ```
 
-This will download all necessary libraries to utilize for FlexDDM!
+This will download all necessary libraries to utilize for FlexDDM! Please make sure to go to where your GitHub repository is in the Anaconda terminal. 
 
 How to Fit a Model
 ------------------
