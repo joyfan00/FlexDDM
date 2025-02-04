@@ -88,7 +88,7 @@ class mDMCfs(Model):
 
         for n in np.arange(0, nTrials):
             t = tau # start the accumulation process at non-decision time tau
-            evidence = beta*alpha/2 - (1-beta)*alpha/2
+            evidence = beta*alpha - (1-beta)*alpha
             np.random.seed(n)
             while (evidence < alpha/2 and evidence > -alpha/2): # keep accumulating evidence until you reach a threshold
                 if congruencylist[n] == 'congruent':
