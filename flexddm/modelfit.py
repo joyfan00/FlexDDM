@@ -5,8 +5,17 @@ import pandas as pd
 from tqdm.notebook import tqdm
 from ._utilities import convertToDF, getRTData
 import seaborn as sns
+import os
 
-def fit(models, input_data, startingParticipants=None, endingParticipants=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True):   
+def fit(models, input_data, startingParticipants=None, endingParticipants=None, input_data_id="PPT", input_data_congruency="Condition", input_data_rt="RT", input_data_accuracy="Correct", output_fileName='output.csv', return_dataframes=False, posterior_predictive_check=True): 
+    output_dir = "fit"
+    os.makedirs(output_dir, exist_ok=True) 
+    fit_parameters_dir = os.path.join(output_dir, "fitted_parameters")
+    os.makedirs(fit_parameters_dir, exist_ok=True)
+    posterior_predictive_check_dir = ""
+    if posterior_predictive_check:
+        posterior_predictive_check_dir = os.path.join(output_dir, "posterior_predictive_check")
+        os.makedirs(posterior_predictive_check_dir, exist_ok=True)   
     if isinstance(input_data, str): 
         # print("in path instance")
         input_data = getRTData(path=input_data, id=input_data_id, congruency=input_data_congruency, rt=input_data_rt, accuracy=input_data_accuracy)
@@ -48,6 +57,8 @@ def fit(models, input_data, startingParticipants=None, endingParticipants=None, 
             df.loc[len(df)] = [id] + list(pars) + [fitstat, bic]
 
             if posterior_predictive_check:
+                posterior_predictive_check_model_dir = os.path.join(posterior_predictive_check_dir, model.__class__.__name__)
+                os.makedirs(posterior_predictive_check_model_dir, exist_ok=True)   
                 pars = list(pars)
                 res = model.modelsimulationfunction(*pars, nTrials=len(current_input))
                 simulated_rts = convertToDF(res, id)
@@ -93,13 +104,14 @@ def fit(models, input_data, startingParticipants=None, endingParticipants=None, 
                 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the title
                 fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=1, bbox_transform=fig.transFigure, fontsize='x-small', frameon=False)
                 plt.show()
-                
+                plot_path = os.path.join(posterior_predictive_check_model_dir, f"participant_{id}.png")
+                # Save the figure
+                fig.savefig(plot_path, dpi=400)
             if not return_dataframes:
-                df.to_csv(model.__class__.__name__ + '_' + output_fileName, index=False)
+                df.to_csv(fit_parameters_dir + "/" + model.__class__.__name__ + '_' + output_fileName, index=False)
 
         if return_dataframes:
             dflist.append(df)
-        else:
-            df.to_csv(model.__class__.__name__ + '_' + output_fileName, index=False)
+        df.to_csv(fit_parameters_dir + "/" + model.__class__.__name__ + '_' + output_fileName, index=False)
     if return_dataframes:
         return dflist

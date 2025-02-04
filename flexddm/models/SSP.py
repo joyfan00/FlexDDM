@@ -82,7 +82,7 @@ class SSP(Model):
         noise = np.random.normal(loc=0, scale=var, size=10000)
         for n in np.arange(0, nTrials):
             t = tau # start the accumulation process at non-decision time tau
-            evidence = beta*alpha/2 - (1-beta)*alpha/2 # start our evidence at initial-bias beta
+            evidence = beta*alpha - (1-beta)*alpha # start our evidence at initial-bias beta
             np.random.seed(n)
             while evidence < alpha/2 and evidence > -alpha/2: # keep accumulating evidence until you reach a threshold
                 sd = sd_0 - (sd_r * (t-tau))

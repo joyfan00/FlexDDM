@@ -9,8 +9,11 @@ from tqdm.notebook import tqdm
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 from ._utilities import convertToDF
+import os
 
 def model_recovery(models, num_simulations=50):
+    output_dir = "validation"
+    os.makedirs(output_dir, exist_ok=True)
     dfs_list = []
     counter = 0
     for model in models:
@@ -71,15 +74,22 @@ def model_recovery(models, num_simulations=50):
     plt.show()
 
     figure = heatmap.get_figure()    
-    figure.savefig('model_validation.png', dpi=400)
+    plot_path = os.path.join(output_dir, "model_validation.png")  
+    figure.savefig(plot_path, dpi=400)
 
 # one set of parameters 
 # we'd take those parameters, simulate the data according to that set of parameters, 
 # then fit the model to the simulated data to see the comparison btw the found params and initial set
 # then use heatmap to show the comparisons between the parameter values 
 def param_recovery(models, num_simulations=50):
+    output_dir = "validation"
+    os.makedirs(output_dir, exist_ok=True)
+    param_validation_dir = os.path.join(output_dir, "parameter_validation")
+    os.makedirs(param_validation_dir, exist_ok=True) 
     counter = 0
     for model in models:
+        model_dir = os.path.join(param_validation_dir, model.__class__.__name__)
+        os.makedirs(model_dir, exist_ok=True) 
         generated_params = []
         fit_params_list = []
         pbar = tqdm(range(num_simulations))
@@ -112,9 +122,6 @@ def param_recovery(models, num_simulations=50):
                     print(e)
                     print("FITTING CANNOT OCCUR")
                     broken = True
-        
-        # print(fit_params_list)
-        # print(generated_params)
         correlation_values = []
         sig_values = []
 
@@ -126,8 +133,10 @@ def param_recovery(models, num_simulations=50):
             correlation, sig_value = pearsonr(generated_i, fit_params_i)
             correlation_values.append(correlation)
             sig_values.append(sig_value)
-            sns.lmplot(df, x='simulated %s' % param_name, y='fit %s' % param_name)
+            param_recovery_plot = sns.lmplot(df, x='simulated %s' % param_name, y='fit %s' % param_name)
             plt.show()
+            plot_path = os.path.join(model_dir, f"{param_name}.png")  
+            param_recovery_plot.savefig(plot_path, dpi=400)
         
         print(correlation_values)
         print(sig_values)

@@ -85,7 +85,7 @@ class mSSPit(Model):
 
         for n in np.arange(0, nTrials):
             t = tau # start the accumulation process at non-decision time tau
-            evidence = beta*alpha/2 - (1-beta)*alpha/2 # start our evidence at initial-bias beta
+            evidence = beta*alpha - (1-beta)*alpha # start our evidence at initial-bias beta
             np.random.seed(n)
             while evidence < alpha/2 and evidence > -alpha/2: # keep accumulating evidence until you reach a threshold
                 sd = (sd_0_sd_r_ratio * 0.018) - (0.018 * (t-tau))

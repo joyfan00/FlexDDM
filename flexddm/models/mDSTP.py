@@ -100,8 +100,8 @@ class mDSTP(Model):
             else:
                 deltaRS1 = delta_target - delta_flanker
             t = tau # start the accumulation process at non-decision time tau
-            evidenceSS = betaSS*alphaSS/2 - (1-betaSS)*alphaSS/2 # start our evidence at initial-bias beta (Kyle: I modified this so beta is always between 0 and 1, and alpha is the total distance between bounds)
-            evidenceRS1 = betaRS*alphaRS/2 - (1-betaRS)*alphaRS/2
+            evidenceSS = betaSS*alphaSS - (1-betaSS)*alphaSS # start our evidence at initial-bias beta (Kyle: I modified this so beta is always between 0 and 1, and alpha is the total distance between bounds)
+            evidenceRS1 = betaRS*alphaRS - (1-betaRS)*alphaRS
             np.random.seed(n)
             while (evidenceSS < alphaSS/2 and evidenceSS > -alphaSS/2) or (evidenceRS1 < alphaRS/2 and evidenceRS1 > -alphaRS/2): # keep accumulating evidence until you reach a threshold
                 delta_noise_SS = np.random.choice(update_jitter_SS)
