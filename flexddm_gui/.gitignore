@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.venv/
+build/
+dist/
+runs/
+data_settings/
+generated_models/
+snapshots/
+*.egg-info/
+!FlexDDM.spec
+!FlexDDM-mac.spec

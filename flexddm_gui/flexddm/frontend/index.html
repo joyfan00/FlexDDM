@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlexDDM</title>
+  <link rel="stylesheet" href="/static/app.css?v=0.1.1-2">
+</head>
+<body>
+  <header>
+    <h1>FlexDDM</h1>
+    <nav>
+      <div class="nav-left">
+        <button class="tab active" data-pane="dataPane">Data</button>
+        <button class="tab" data-pane="modelPane">Model</button>
+        <button class="tab" data-pane="simulatePane">Simulate</button>
+        <button class="tab" id="validateTab" data-pane="validationPane"><span class="nav-spinner" aria-hidden="true"></span>Validate</button>
+        <button class="tab" id="fitTab" data-pane="fitPane"><span class="nav-spinner" aria-hidden="true"></span>Fit</button>
+      </div>
+      <div class="nav-right">
+        <button class="tab" id="tutorialTab" type="button">Tutorial</button>
+        <button class="tab" data-pane="optionsPane">Options</button>
+        <button class="tab" data-pane="aboutPane">About</button>
+      </div>
+    </nav>
+  </header>
+  <div id="tutorialIntroModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="tutorialIntroTitle">
+    <div class="modal tutorial-intro-modal">
+      <h2 id="tutorialIntroTitle">Start Tutorial?</h2>
+      <p class="tutorial-intro-copy">This guided walkthrough introduces the full FlexDDM workflow: loading and mapping data, filtering and checking diagnostics, reading and editing models, simulating synthetic datasets, validating models, fitting models, tuning options, and finding contact/citation information. It is written for new users, so each step explains both what the control does and why it matters for diffusion modeling.</p>
+      <div class="modal-actions">
+        <button class="secondary" id="tutorialIntroNo" type="button">No</button>
+        <button id="tutorialIntroYes" type="button">Yes, Start Tutorial</button>
+      </div>
+    </div>
+  </div>
+  <div id="tutorialLayer" class="tutorial-layer hidden" aria-live="polite">
+    <div class="tutorial-dim"></div>
+    <div id="tutorialSpotlight" class="tutorial-spotlight"></div>
+    <div id="tutorialBubble" class="tutorial-bubble">
+      <h3 id="tutorialTitle"></h3>
+      <p id="tutorialBody"></p>
+      <div id="tutorialCopyCode" class="tutorial-copy-code hidden"></div>
+      <div id="tutorialWaiting" class="tutorial-waiting hidden"></div>
+      <div id="tutorialProgress" class="tutorial-progress"></div>
+      <div class="tutorial-actions">
+        <button class="secondary" id="tutorialExit" type="button">Exit</button>
+        <button class="secondary" id="tutorialBack" type="button">Back</button>
+        <button id="tutorialNext" type="button">Okay</button>
+      </div>
+    </div>
+  </div>
+  <div id="clusterExportModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="clusterExportModalTitle">
+    <div class="modal cluster-export-modal">
+      <h2 id="clusterExportModalTitle">Long Job Detected</h2>
+      <div id="clusterExportMessage" class="status"></div>
+      <div id="clusterExportSettings" class="panel stack">
+        <h3>Cluster Settings</h3>
+        <div class="grid3">
+          <div><label for="clusterExportTime">Time limit</label><input id="clusterExportTime" value="12:00:00"></div>
+          <div><label for="clusterExportCpus">CPU cores</label><input id="clusterExportCpus" value="4"></div>
+          <div><label for="clusterExportMem">Memory</label><input id="clusterExportMem" value="16G"></div>
+          <div><label for="clusterExportPartition">Partition</label><input id="clusterExportPartition" placeholder="optional"></div>
+          <div><label for="clusterExportAccount">Account</label><input id="clusterExportAccount" placeholder="optional"></div>
+          <div><label for="clusterExportPythonModule">Python module</label><input id="clusterExportPythonModule" placeholder="blank = auto-detect, or exact module name"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="clusterExportAbort" type="button">Abort</button>
+        <button class="secondary" id="clusterExportDismiss" type="button">Continue Anyway</button>
+        <button id="clusterExportApply" type="button">Export Cluster Package</button>
+      </div>
+      <div id="clusterExportStatus" class="status"></div>
+      <div id="clusterExportGuide" class="cluster-guide hidden"></div>
+    </div>
+  </div>
+  <main>
+    <section id="dataPane" class="pane active">
+      <div class="panel stack">
+        <h2>Data</h2>
+        <div>
+          <label for="csvPath">CSV path</label>
+          <div class="toolbar">
+            <input id="csvPath" placeholder="Choose a CSV file">
+            <button class="secondary" id="browseCsv">Browse</button>
+          </div>
+        </div>
+        <div id="dataStatus" class="status"></div>
+        <details id="dataMappingDetails" class="accordion hidden" open>
+          <summary>Column Mapping</summary>
+          <div class="accordion-body">
+            <div class="grid">
+              <div><label for="participantCol">Participant column</label><select id="participantCol"></select></div>
+              <div><label for="rtCol">RT column</label><select id="rtCol"></select></div>
+              <div><label for="accuracyCol">Response / accuracy column</label><select id="accuracyCol"></select></div>
+              <div><label class="with-help" for="responseKind">Response meaning <span class="help" title="Accuracy means 1=correct and 0=incorrect. Choice means 1=upper/left/target response and 0=lower/right/alternative response.">?</span></label><select id="responseKind"><option value="">Choose meaning</option><option value="accuracy">Accuracy</option><option value="choice">Choice</option></select></div>
+            </div>
+          </div>
+        </details>
+        <details id="dataConditionsDetails" class="accordion hidden" open>
+          <summary>Conditions</summary>
+          <div class="accordion-body stack">
+            <div class="notice">Choose zero, one, or several original columns to define model conditions. With no assigned condition columns, FlexDDM treats every trial as one condition named all.</div>
+            <div id="conditionColumns" class="condition-columns"></div>
+          </div>
+        </details>
+        <div id="filterContent" class="stack hidden">
+          <details id="filterControlsDetails" class="accordion" open>
+            <summary>Filters</summary>
+            <div class="accordion-body">
+              <div class="notice">Choose original CSV columns. Checkbox filters include checked values only; numeric range filters keep rows within the entered range.</div>
+              <div id="columnFilters" class="stack"></div>
+            </div>
+          </details>
+          <details id="dataConstantsDetails" class="accordion" open>
+            <summary>Data Constants</summary>
+            <div class="accordion-body">
+              <div id="dataConstants" class="tablewrap"></div>
+            </div>
+          </details>
+          <div class="subsection stack">
+            <h3>Data Diagnostics</h3>
+            <div id="participantViewRow" class="toolbar hidden">
+              <div><label for="participantViewSelect">Participant view</label><select id="participantViewSelect"></select></div>
+            </div>
+            <div id="dataDiagnosticsExportFrame" class="export-frame">
+              <button class="save-icon" id="saveDataDiagnostics" title="Save data diagnostics image" aria-label="Save data diagnostics image"></button>
+              <img id="filterOverviewImage" class="diagnostic-image" alt="Filtered data diagnostics">
+            </div>
+          </div>
+          <div id="filterStatus" class="status"></div>
+          <div>
+            <h3>Preview Rows</h3>
+            <div id="filterDataTable" class="tablewrap preview-table"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modelPane" class="pane">
+      <div class="panel stack">
+        <h2>Model</h2>
+        <div class="loaded-model-row">
+          <div><label for="loadedModelLabel">Loaded model</label><div id="loadedModelLabel" class="loaded-model-display">No model loaded</div></div>
+          <button id="openModelLoader" class="secondary" type="button">Browse</button>
+        </div>
+        <div id="modelLoadModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modelLoadModalTitle">
+          <div class="modal model-load-modal">
+            <div class="model-load-header">
+              <h2 id="modelLoadModalTitle">Load Model</h2>
+              <button class="secondary" id="closeModelLoader" type="button">Close</button>
+            </div>
+            <div class="segmented">
+              <label><input type="radio" name="modelLoadSource" value="template" checked>Templates</label>
+              <label><input type="radio" name="modelLoadSource" value="custom">Custom</label>
+            </div>
+            <label class="with-help" id="simulationTemplateToggleLabel"><input id="showSimulationTemplates" type="checkbox">Show simulation templates <span class="help" title="Simulation templates show explicit trial-by-trial simulators. Use these when a model cannot be represented as one one-dimensional Fokker-Planck process, or when you want to teach/edit the simulator directly.">?</span></label>
+            <div id="modelLoadCards" class="model-card-grid"></div>
+          </div>
+        </div>
+        <div id="deleteModelModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModelModalTitle">
+          <div class="modal">
+            <h2 id="deleteModelModalTitle">Delete Custom Model?</h2>
+            <p id="deleteModelMessage" class="muted"></p>
+            <div id="deleteModelError" class="status hidden"></div>
+            <div class="modal-actions">
+              <button class="secondary" id="cancelDeleteModel" type="button">Cancel</button>
+              <button class="danger-action" id="confirmDeleteModel" type="button">Delete Model</button>
+            </div>
+          </div>
+        </div>
+        <div id="modelHelperBar" class="model-helper-bar">
+          <button class="secondary" id="addParameterButton" type="button" title="Add a new free parameter to the visible model functions.">Add Parameter</button>
+          <button class="secondary process-helper" data-function-component="drift" type="button" title="Add or edit the drift function.">Add Drift</button>
+          <button class="secondary process-helper" data-function-component="bound" type="button" title="Add or edit the decision boundary function.">Add Boundary</button>
+          <button class="secondary process-helper" data-function-component="noise" type="button" title="Add or edit the diffusion noise function.">Add Noise</button>
+          <button class="secondary process-helper" data-function-component="starting_position" type="button" title="Add or edit the starting point function.">Add Start</button>
+          <button class="secondary process-helper" data-function-component="nondecision" type="button" title="Add or edit the non-decision time function.">Add Non-decision</button>
+          <button class="secondary" id="addConditionButton" type="button" title="Add condition-specific branches to a model function.">Add Condition</button>
+          <button class="secondary" id="insertCovariateSnippet" type="button" title="Choose where a trial-level covariate should be made available.">Add Covariate</button>
+        </div>
+        <div id="parameterModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="parameterModalTitle">
+          <div class="modal">
+            <h2 id="parameterModalTitle">Add Parameter</h2>
+            <div class="grid3">
+              <div><label for="parameterModalName">Free parameter name</label><input id="parameterModalName" placeholder="example: emotionality_weight"></div>
+              <div><label for="parameterModalLower">Lower bound</label><input id="parameterModalLower" value="-1.0"></div>
+              <div><label for="parameterModalUpper">Upper bound</label><input id="parameterModalUpper" value="1.0"></div>
+            </div>
+            <div id="parameterModalError" class="status hidden"></div>
+            <div class="modal-actions">
+              <button class="secondary" id="cancelParameterAdd" type="button">Cancel</button>
+              <button id="applyParameterAdd" type="button">Add Parameter</button>
+            </div>
+          </div>
+        </div>
+        <div id="functionModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="functionModalTitle">
+          <div class="modal function-modal">
+            <h2 id="functionModalTitle">Add Function</h2>
+            <div id="functionModalNotice" class="notice hidden"></div>
+            <textarea id="functionModalCode" spellcheck="false"></textarea>
+            <div class="function-tools">
+              <div id="functionParameterRow" class="inline-action-row">
+                <div><label for="functionParameterName">Parameter</label><input id="functionParameterName" placeholder="new_parameter"></div>
+                <div><label for="functionParameterLower">Lower</label><input id="functionParameterLower" value="-1.0"></div>
+                <div><label for="functionParameterUpper">Upper</label><input id="functionParameterUpper" value="1.0"></div>
+                <button class="secondary" id="functionModalAddParameter" type="button">Add Parameter</button>
+              </div>
+              <div id="functionCovariateRow" class="inline-action-row">
+                <div><label for="functionCovariateVariable">Covariate</label><select id="functionCovariateVariable"></select></div>
+                <div id="functionCovariateCustomWrap" class="hidden"><label for="functionCovariateCustom">Custom covariate</label><input id="functionCovariateCustom" value="custom_covariate"></div>
+                <div><label for="functionCovariateType">Type</label><select id="functionCovariateType"><option value="numeric">Numeric</option><option value="label">Label</option></select></div>
+                <div><label for="functionCovariateCoefficient">Coefficient</label><input id="functionCovariateCoefficient" value="covariate_weight"></div>
+                <div><label for="functionCovariateEffect">Effect</label><select id="functionCovariateEffect"></select></div>
+                <button class="secondary" id="functionModalAddCovariate" type="button">Add Covariate</button>
+              </div>
+              <div id="functionModalError" class="status hidden"></div>
+            </div>
+            <div class="modal-actions">
+              <button class="secondary" id="cancelFunctionAdd" type="button">Cancel</button>
+              <button id="applyFunctionAdd" type="button">Apply Function</button>
+            </div>
+          </div>
+        </div>
+        <div id="covariateModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="covariateModalTitle">
+          <div class="modal">
+            <h2 id="covariateModalTitle">Insert Covariate</h2>
+            <div class="notice">Choose the model component this trial-level variable should modify. FlexDDM will add the trial-row lookup, coefficient, and return-line edit for you.</div>
+            <div class="grid">
+              <div><label for="covariateModalVariable">Covariate</label><select id="covariateModalVariable"></select></div>
+              <div id="covariateModalCustomWrap" class="hidden"><label for="covariateModalCustom">Custom covariate</label><input id="covariateModalCustom" value="custom_covariate"></div>
+              <div><label for="covariateModalType">Type</label><select id="covariateModalType"><option value="numeric">Numeric</option><option value="label">Label</option></select></div>
+              <div><label for="covariateModalCoefficient">Free parameter</label><input id="covariateModalCoefficient" value="covariate_weight"></div>
+            </div>
+            <div class="grid">
+              <div><label for="covariateModalTarget">Modify function</label><select id="covariateModalTarget"></select></div>
+              <div><label for="covariateModalEffect">Effect pattern</label><select id="covariateModalEffect"></select></div>
+            </div>
+            <div id="covariateModalPreview" class="status"></div>
+            <div class="modal-actions">
+              <button class="secondary" id="cancelCovariateInsert" type="button">Cancel</button>
+              <button id="applyCovariateInsert" type="button">Apply</button>
+            </div>
+          </div>
+        </div>
+        <div class="model-workspace">
+          <div class="model-code-column">
+            <div class="code-editor-wrap">
+              <button id="pasteModelCode" class="secondary code-paste-button" type="button" title="Replace the code with the current clipboard text">Paste</button>
+              <span class="help code-runtime-help" title="Model functions should stay compatible with compiled solver evaluation. You can use Python arithmetic, math, and NumPy; these are already available behind the scenes, so you do not need import statements. Avoid pandas, scipy, plotting libraries, file I/O, random draws, or side effects inside drift/bound/noise/start/non-decision functions. Custom simulate(...) blocks can be more flexible, but may not use the fastest compiled path.">?</span>
+              <textarea id="modelCode" class="code" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="schematic-panel panel stack">
+            <div class="schematic-controls" id="schematicLegendControls"></div>
+            <div id="modelSchematicExportFrame" class="export-frame ready">
+              <button class="save-icon" id="saveModelSchematic" title="Save model schematic image" aria-label="Save model schematic image"></button>
+              <div id="schematicCanvasWrap" class="schematic-canvas-wrap">
+                <canvas id="modelSchematicCanvas" class="schematic-canvas" width="720" height="520"></canvas>
+                <div class="schematic-loading" aria-hidden="true"><div class="big-spinner"></div></div>
+              </div>
+            </div>
+            <div id="schematicSliders" class="schematic-sliders"></div>
+            <div id="modelSchematicStatus" class="status hidden"></div>
+          </div>
+        </div>
+        <div class="panel stack">
+          <h3>Free Parameters</h3>
+          <div id="parameterBounds" class="tablewrap"></div>
+        </div>
+        <div id="saveModelModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="saveModelModalTitle">
+          <div class="modal">
+            <h2 id="saveModelModalTitle">Save Model</h2>
+            <div><label for="saveModelName">Model name</label><input id="saveModelName" value="MyFlexModel"></div>
+            <div><label for="saveModelDescription">Description notes</label><textarea id="saveModelDescription" rows="4" placeholder="Briefly describe what this model is meant to do."></textarea></div>
+            <div class="modal-actions">
+              <button class="secondary" id="cancelSaveModel" type="button">Cancel</button>
+              <button id="applySaveModel" type="button">Save</button>
+            </div>
+          </div>
+        </div>
+        <button id="saveModel" class="fit-action">Save Model</button>
+        <div id="conditionModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="conditionModalTitle">
+          <div class="modal function-modal">
+            <h2 id="conditionModalTitle">Add Condition Logic</h2>
+            <div class="grid">
+              <div><label for="conditionModalTarget">Modify function</label><select id="conditionModalTarget"></select></div>
+              <div><label for="conditionModalColumn">Condition column</label><select id="conditionModalColumn"></select></div>
+              <div id="conditionModalCustomWrap" class="hidden"><label for="conditionModalCustom">Custom condition variable</label><input id="conditionModalCustom" value="condition"></div>
+            </div>
+            <textarea id="conditionModalCode" spellcheck="false"></textarea>
+            <div id="conditionModalError" class="status hidden"></div>
+            <div class="modal-actions">
+              <button class="secondary" id="cancelConditionAdd" type="button">Cancel</button>
+              <button id="applyConditionAdd" type="button">Apply Condition Logic</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulatePane" class="pane">
+      <div class="panel stack">
+        <h2>Simulate</h2>
+        <details id="simulateSetupDetails" class="accordion" open>
+          <summary>Simulation Setup</summary>
+          <div class="accordion-body">
+            <div class="grid">
+              <div><label for="simulateModelSelect">Model</label><select id="simulateModelSelect"></select></div>
+              <div><label for="simulateParticipants">Participants</label><input id="simulateParticipants" value="20"></div>
+              <div><label for="simulateTrials">Trials per participant</label><input id="simulateTrials" value="120"></div>
+            </div>
+            <div class="subsection">
+              <h3>Free Parameter Distributions</h3>
+              <div id="simulateParameterControls" class="simulate-param-grid"></div>
+            </div>
+            <details id="simulateCovariateDetails" class="accordion">
+              <summary>Trial Covariates / Participant Traits</summary>
+              <div class="accordion-body">
+                <div class="notice">Add synthetic variables to the generated dataset. Participant traits are constant within a participant; trial covariates vary row by row. Correlation targets use participant-level parameter draws.</div>
+                <div id="simulateCovariates" class="stack"></div>
+                <button class="secondary" id="addSimCovariate" type="button">Add Covariate / Trait</button>
+              </div>
+            </details>
+            <button id="runSimulate" class="fit-action">Create Synthetic Data</button>
+          </div>
+        </details>
+        <div id="simulateStatus" class="status"></div>
+        <div id="simulateResultsArea" class="stack hidden">
+          <div id="simulateTableExportFrame" class="export-frame">
+            <button class="save-icon" id="saveSimulatedTable" title="Save simulated data CSV" aria-label="Save simulated data CSV"></button>
+            <div id="simulateDataTable" class="tablewrap preview-table"></div>
+          </div>
+          <div class="subsection stack">
+            <h3>Simulated Data Diagnostics</h3>
+            <div id="simulateParticipantViewRow" class="toolbar hidden">
+              <div><label for="simulateParticipantViewSelect">Participant view</label><select id="simulateParticipantViewSelect"></select></div>
+            </div>
+            <div id="simulateDiagnosticsExportFrame" class="export-frame">
+              <button class="save-icon" id="saveSimulatedDiagnostics" title="Save simulated diagnostics image" aria-label="Save simulated diagnostics image"></button>
+              <img id="simulateOverviewImage" class="diagnostic-image" alt="Simulated data diagnostics">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="optionsPane" class="pane">
+      <div class="panel stack">
+        <h2>Options</h2>
+        <div class="grid">
+          <div><label class="with-help" for="seed">Random seed <span class="help" title="Initial seed used for reproducible simulation draws and optimization setup.">?</span></label><input id="seed" value="10"></div>
+          <div><label class="with-help" for="workers">Workers <span class="help" title="When fitting multiple participants, workers split across participant fits. For a single participant, simulation uses one worker to avoid Windows local-object pickling errors; Fokker-Planck can still use a thread pool inside the fit.">?</span></label><input id="workers" value="1"></div>
+        </div>
+        <div class="panel stack">
+          <h3>Differential Evolution</h3>
+          <div class="grid3">
+            <div><label class="with-help" for="maxiter">Iterations <span class="help" title="Maximum number of differential-evolution generations. More generations search longer.">?</span></label><input id="maxiter" value="12"></div>
+            <div><label class="with-help" for="popsize">Population size <span class="help" title="Population multiplier per free parameter. Larger values search more broadly but call the model more often.">?</span></label><input id="popsize" value="5"></div>
+            <div><label class="with-help" for="simulatedTrials">Simulation trials per objective call <span class="help" title="Only used by simulation fitting while scoring candidates. Posterior predictive checks are sampled later to match the empirical N and condition counts.">?</span></label><input id="simulatedTrials" value="80"></div>
+            <div><label class="with-help" for="simulationDt">Simulation time step <span class="help" title="Time step used by custom simulator templates that read the runtime object.">?</span></label><input id="simulationDt" value="0.01"></div>
+            <div><label class="with-help" for="simulationNoiseSd">Simulation noise SD <span class="help" title="Noise standard deviation used by custom simulator templates that read the runtime object.">?</span></label><input id="simulationNoiseSd" value="0.01"></div>
+            <div><label class="with-help" for="polish">Polish <span class="help" title="Run SciPy's final polishing step after differential evolution. This can add extra objective evaluations.">?</span></label><select id="polish"><option value="false">Off</option><option value="true">On</option></select></div>
+            <div><label class="with-help" for="localRefine">Local refine <span class="help" title="Run a local optimizer after differential evolution. This can improve the fit but adds extra time.">?</span></label><select id="localRefine"><option value="false">Off</option><option value="true">On</option></select></div>
+          </div>
+        </div>
+        <div class="panel stack">
+          <h3>Objective / G2 Binning</h3>
+          <div class="notice">These quantiles define the response-time bins used by the G2 objective. They affect both simulation fitting and Fokker-Planck fitting when the FP objective is set to G2.</div>
+          <div class="grid">
+            <div><label class="with-help" for="cdfQuantiles">Correct/choice RT quantiles <span class="help" title="Quantiles used to divide the response-time distribution for upper-bound/correct responses. Enter ascending values between 0 and 1.">?</span></label><input id="cdfQuantiles" value="0.10,0.30,0.50,0.70,0.90"></div>
+            <div><label class="with-help" for="cafQuantiles">CAF quantiles <span class="help" title="Quantiles used to divide all response times for conditional accuracy/function bins. Enter ascending values between 0 and 1.">?</span></label><input id="cafQuantiles" value="0.25,0.50,0.75"></div>
+          </div>
+        </div>
+        <div class="panel stack">
+          <h3>Fokker-Planck</h3>
+          <div class="notice">Fokker-Planck uses the FP-readable functions in the selected model file. One-dimensional models use the compiled adaptive KFE solver when drift and boundary may vary over time but diffusion is constant. Time-varying or evidence-dependent diffusion falls back to the compiled transition solver because the KFE path represents diffusion as a scalar solve parameter.</div>
+          <div class="grid3">
+            <div><label class="with-help" for="fpObjective">Fit objective <span class="help" title="G2 is directly comparable with simulation G2. -2LL uses the FP density likelihood.">?</span></label><select id="fpObjective"><option value="g2">G2</option><option value="likelihood">-2LL</option></select></div>
+            <div><label class="with-help" for="dtFp">Time step <span class="help" title="Time discretization for FP/KFE density calculations. Smaller values are more accurate and slower.">?</span></label><input id="dtFp" value="0.02"></div>
+            <div><label class="with-help" for="dxFp">Evidence grid step <span class="help" title="Evidence-grid discretization. Smaller values are more accurate and slower; KFE uses a normalized grid.">?</span></label><input id="dxFp" value="0.01"></div>
+            <div><label class="with-help" for="tmaxFp">Max time <span class="help" title="Maximum decision time represented by the FP solver, before non-decision time is added.">?</span></label><input id="tmaxFp" value="3"></div>
+          </div>
+        </div>
+        <div class="panel stack">
+          <h3>Validation Diagnostics</h3>
+          <div class="grid3">
+            <div><label class="with-help" for="hessianStepFraction">Hessian step fraction <span class="help" title="Finite-difference step as a fraction of each parameter's allowed range for curvature diagnostics.">?</span></label><input id="hessianStepFraction" value="0.01"></div>
+            <div><label class="with-help" for="hessianMinStep">Hessian minimum step <span class="help" title="Smallest absolute finite-difference step allowed for Hessian curvature calculations.">?</span></label><input id="hessianMinStep" value="0.0001"></div>
+            <div><label class="with-help" for="hessianRidge">Hessian inversion ridge <span class="help" title="Regularization added before inverting the Hessian. Larger values stabilize inversion but can soften correlations.">?</span></label><input id="hessianRidge" value="0.000001"></div>
+            <div><label class="with-help" for="profileGridPoints">Profile grid points <span class="help" title="Number of values evaluated for each single-parameter likelihood/profile slice.">?</span></label><input id="profileGridPoints" value="31"></div>
+            <div><label class="with-help" for="profileBoundTrim">Profile bound trim <span class="help" title="Fraction trimmed from each side of the parameter bounds before profile sweeps. Use 0 to include exact bounds.">?</span></label><input id="profileBoundTrim" value="0.01"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aboutPane" class="pane">
+      <div class="panel stack about-pane">
+        <div class="about-hero">
+          <div id="aboutName" class="about-title">FlexDDM</div>
+          <div id="aboutDescription" class="about-description"></div>
+        </div>
+        <div class="about-meta">
+          <div class="about-meta-item">
+            <div class="about-meta-label">Version</div>
+            <div id="aboutVersion" class="about-meta-value"></div>
+          </div>
+          <div class="about-meta-item">
+            <div class="about-meta-label">Build</div>
+            <div id="aboutBuild" class="about-meta-value"></div>
+          </div>
+          <div class="about-meta-item">
+            <div class="about-meta-label">Contact</div>
+            <div id="aboutContact" class="about-meta-value"></div>
+          </div>
+        </div>
+        <div class="subsection">
+          <h3>Citation</h3>
+          <p id="aboutCitation" class="about-citation"></p>
+        </div>
+        <div class="subsection">
+          <h3>Copyright Notice</h3>
+          <pre id="aboutCopyright" class="about-notice-text"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="fitPane" class="pane">
+      <div class="panel stack">
+        <h2>Fit</h2>
+        <details id="fitSetupDetails" class="accordion" open>
+          <summary>Fit Setup</summary>
+          <div class="accordion-body">
+            <div class="grid">
+              <div><label for="fitModelSelect">Model</label><select id="fitModelSelect"></select></div>
+              <div><label for="fitBackend">Fit backend</label><select id="fitBackend"><option value="fokker_planck" selected>Fokker-Planck</option><option value="simulation_de">Simulation</option></select></div>
+              <div>
+                <label class="with-help">Fit target <span class="help" title="All IDs fits every cleaned participant separately. Selected IDs fits one participant or a range/list. Pooled Fit ignores participant IDs and treats all rows as one dataset.">?</span></label>
+                <div class="segmented" id="fitScopeGroup">
+                  <label><input type="radio" name="fitScope" value="all" checked>All IDs</label>
+                  <label><input type="radio" name="fitScope" value="selected">Selected IDs</label>
+                  <label><input type="radio" name="fitScope" value="pooled">Pooled Fit</label>
+                </div>
+              </div>
+              <div id="participantIdRow" class="hidden"><label class="with-help" for="participantId">Participant IDs / ranges <span class="help" title="Examples: 1 for one participant, 1-10 for a range, or 1-10, 20, 25 for a mixed list. Cleaned participant IDs are used.">?</span></label><input id="participantId" placeholder="1 or 1-10, 20"></div>
+            </div>
+            <button id="runFit" class="fit-action">Fit Model</button>
+          </div>
+        </details>
+        <div id="fitStatus" class="status"></div>
+        <div id="fitResultsArea" class="stack hidden">
+          <div class="grid">
+            <div>
+              <h3>Parameters</h3>
+              <div id="fitTableExportFrame" class="export-frame">
+                <button class="save-icon" id="saveFitTable" title="Save fit parameters CSV" aria-label="Save fit parameters CSV"></button>
+                <div id="fitTable" class="tablewrap"></div>
+              </div>
+            </div>
+            <div>
+              <h3>Condition Summary</h3>
+              <div id="conditionTableExportFrame" class="export-frame">
+                <button class="save-icon" id="saveConditionTable" title="Save condition summary CSV" aria-label="Save condition summary CSV"></button>
+                <div id="conditionTable" class="tablewrap"></div>
+              </div>
+            </div>
+          </div>
+          <div id="fitCovariatePanel" class="panel stack hidden">
+            <h3>Participant Covariate Associations</h3>
+            <div id="fitCovariateTableExportFrame" class="export-frame">
+              <button class="save-icon" id="saveFitCovariateTable" title="Save participant covariate associations CSV" aria-label="Save participant covariate associations CSV"></button>
+              <div id="fitCovariateTable" class="tablewrap"></div>
+            </div>
+          </div>
+          <div class="panel stack">
+            <h3>Fit Diagnostics</h3>
+            <div id="ppcSelectRow" class="grid">
+              <div><label for="ppcSelect">Posterior predictive view</label><select id="ppcSelect"></select></div>
+            </div>
+            <div id="ppcExportFrame" class="export-frame">
+              <button class="save-icon" id="savePpcImage" title="Save posterior predictive image" aria-label="Save posterior predictive image"></button>
+              <img id="ppcImage" class="ppc" alt="Posterior predictive check">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="validationPane" class="pane">
+      <div class="panel stack">
+        <h2>Validation</h2>
+        <details id="validationSetupDetails" class="accordion" open>
+          <summary>Validation Setup</summary>
+          <div class="accordion-body">
+            <div class="grid">
+              <div><label class="with-help" for="validationMode">Validation <span class="help" title="Parameter recovery simulates from one model and refits it. Model recovery asks which fitted model wins. Internal consistency fits odd/even real data. Curvature inverts a finite-difference Hessian at the fitted point; profiles sweep one parameter at a time around synthetic ground truth.">?</span></label><select id="validationMode"><option value="parameter">Parameter recovery</option><option value="model">Model recovery</option><option value="internal">Internal consistency reliability</option><option value="curvature">Parameter curvature / Hessian</option><option value="profile">Likelihood profiles / slices</option></select></div>
+              <div><label class="with-help" for="validationBackend">Fit backend <span class="help" title="Backend used for fitting during validation. Simulation is most flexible; Fokker-Planck is available for FP-readable models.">?</span></label><select id="validationBackend"><option value="fokker_planck" selected>Fokker-Planck</option><option value="simulation_de">Simulation</option></select></div>
+              <div id="validationSingleModelRow"><label class="with-help" for="validationModelSelect">Model <span class="help" title="Parameter recovery and internal consistency use exactly one model.">?</span></label><select id="validationModelSelect"></select></div>
+              <div id="validationModelRecoveryRow" class="hidden"><label class="with-help" for="validationModelChecklist">Models <span class="help" title="Model recovery fits every selected candidate to each synthetic dataset and builds a recovery heat map.">?</span></label><div id="validationModelChecklist" class="check-list"></div></div>
+              <div id="validationParticipantRow"><label class="with-help" for="validationParticipantId">Participant ids/ranges <span class="help" title="Only used for internal consistency reliability. Blank means all cleaned participant IDs. Ranges such as 1-10 are allowed.">?</span></label><input id="validationParticipantId" placeholder="blank = all participants"></div>
+              <div id="validationSimsRow"><label class="with-help" for="validationSims">Synthetic participants <span class="help" title="For parameter/model recovery, the number of synthetic participants generated per model.">?</span></label><input id="validationSims" value="100"></div>
+              <div id="validationTrialsRow"><label class="with-help" for="validationTrials">Trials per synthetic participant <span class="help" title="For synthetic recovery, the number of trials in each synthetic participant dataset. This is separate from simulation trials per objective call in Options.">?</span></label><input id="validationTrials" value="100"></div>
+            </div>
+            <button class="fit-action" id="runValidation">Run Validation</button>
+          </div>
+        </details>
+        <div id="validationStatus" class="status"></div>
+        <div id="validationResultsArea" class="panel stack hidden">
+          <h3>Validation Diagnostics</h3>
+          <div id="validationTableExportFrame" class="export-frame">
+            <button class="save-icon" id="saveValidationTable" title="Save validation table CSV" aria-label="Save validation table CSV"></button>
+            <div id="validationTable" class="tablewrap"></div>
+          </div>
+          <div id="validationImageExportFrame" class="export-frame">
+            <button class="save-icon" id="saveValidationImage" title="Save validation image" aria-label="Save validation image"></button>
+            <img id="validationImage" class="ppc" alt="Validation diagnostic plot">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/static/app.js?v=0.1.1-2"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+include README.md
+recursive-include flexddm/frontend *
+recursive-include flexddm/cpp *.cpp
+recursive-include data *.csv
+recursive-include assets *.ico *.png

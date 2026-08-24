@@ -1,0 +1,31 @@
+[project]
+name = "flexddm"
+version = "0.1.1"
+description = "A cleaner FlexDDM foundation for flexible simulation-based DDM fitting and diagnostics."
+requires-python = ">=3.10"
+dependencies = [
+  "matplotlib>=3.7",
+  "numpy>=1.24",
+  "numba>=0.67",
+  "pandas>=1.5",
+  "pybind11>=2.12",
+  "scipy>=1.10",
+  "seaborn>=0.12",
+]
+
+[project.scripts]
+flexddm = "flexddm.app:run"
+
+[build-system]
+requires = ["setuptools>=68", "pybind11>=2.12"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["flexddm*"]
+
+[tool.setuptools.package-data]
+flexddm = [
+  "frontend/index.html",
+  "frontend/static/app.css",
+  "frontend/static/app.js",
+]
