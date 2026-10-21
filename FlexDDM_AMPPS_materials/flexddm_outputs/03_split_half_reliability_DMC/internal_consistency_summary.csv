@@ -1,0 +1,8 @@
+parameter,participants,split_half_r,spearman_brown_r,odd_mean,even_mean
+alpha,16,0.1528,0.2651,0.1157,0.1284
+beta,16,0.0852,0.157,0.3243,0.2739
+characteristic_time,16,-0.3095,-0.8964,0.5349,0.496
+mu_c,16,0.5788,0.7332,0.4821,0.5235
+peak_amplitude,16,-0.0438,-0.0915,0.1442,0.1442
+shape,16,0.0713,0.1331,2.982,3.2446
+tau,16,0.3778,0.5485,0.2634,0.2459

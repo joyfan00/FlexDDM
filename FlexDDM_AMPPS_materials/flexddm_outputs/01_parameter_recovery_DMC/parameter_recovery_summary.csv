@@ -1,0 +1,8 @@
+parameter,simulations,pearson_r,p_value
+alpha,100,0.6983,0.0
+beta,100,0.9416,0.0
+characteristic_time,100,0.5314,0.0
+mu_c,100,0.9137,0.0
+peak_amplitude,100,0.7392,0.0
+shape,100,0.428,0.0
+tau,100,0.9393,0.0

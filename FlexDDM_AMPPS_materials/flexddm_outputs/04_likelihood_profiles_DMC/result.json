@@ -1,0 +1,63 @@
+{
+ "mode": "profile",
+ "rows": [
+  {
+   "parameter": "alpha",
+   "true_value": 0.225,
+   "best_slice_value": 0.22500000000000003,
+   "objective_range": 3508.2542099542593,
+   "flat_profile_flag": false,
+   "near_true_peak": true
+  },
+  {
+   "parameter": "beta",
+   "true_value": 0.5,
+   "best_slice_value": 0.49999999999999994,
+   "objective_range": 5134.715367148174,
+   "flat_profile_flag": false,
+   "near_true_peak": true
+  },
+  {
+   "parameter": "mu_c",
+   "true_value": 0.5,
+   "best_slice_value": 0.5,
+   "objective_range": 1605.6185420573518,
+   "flat_profile_flag": false,
+   "near_true_peak": true
+  },
+  {
+   "parameter": "shape",
+   "true_value": 3.0,
+   "best_slice_value": 3.0,
+   "objective_range": 2850.7215063722556,
+   "flat_profile_flag": false,
+   "near_true_peak": true
+  },
+  {
+   "parameter": "characteristic_time",
+   "true_value": 0.505,
+   "best_slice_value": 0.47265999999999997,
+   "objective_range": 7174.259916123564,
+   "flat_profile_flag": false,
+   "near_true_peak": false
+  },
+  {
+   "parameter": "peak_amplitude",
+   "true_value": 0.20750000000000002,
+   "best_slice_value": 0.20750000000000002,
+   "objective_range": 1149.6106049865434,
+   "flat_profile_flag": false,
+   "near_true_peak": true
+  },
+  {
+   "parameter": "tau",
+   "true_value": 0.3,
+   "best_slice_value": 0.30000000000000004,
+   "objective_range": 4693.665381589581,
+   "flat_profile_flag": false,
+   "near_true_peak": true
+  }
+ ],
+ "plotUrl": "/runs/profiles_DMC/likelihood_profiles.png",
+ "estimateCsv": "/runs/profiles_DMC/likelihood_profiles.csv"
+}

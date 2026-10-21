@@ -1,0 +1,42 @@
+{
+  "alpha": [
+    0.07,
+    0.38
+  ],
+  "beta": [
+    0.0,
+    1.0
+  ],
+  "mu_c": [
+    0.2,
+    0.8
+  ],
+  "shape": [
+    1.5,
+    4.5
+  ],
+  "characteristic_time": [
+    0.01,
+    1.0
+  ],
+  "peak_amplitude": [
+    0.015,
+    0.4
+  ],
+  "tau": [
+    0.15,
+    "min_rt"
+  ],
+  "collapse_rate": [
+    0.05,
+    2.0
+  ],
+  "collapse_shape": [
+    0.5,
+    5.0
+  ],
+  "collapse_amount": [
+    0.0,
+    0.95
+  ]
+}

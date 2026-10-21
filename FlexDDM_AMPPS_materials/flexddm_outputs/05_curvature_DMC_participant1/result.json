@@ -1,0 +1,399 @@
+{
+ "mode": "curvature",
+ "rows": [
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "alpha",
+   "hessian": 429097.46883901465,
+   "covariance": 4.317099301627031e-05,
+   "correlation": 1.0,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "beta",
+   "hessian": -89616.534106714,
+   "covariance": -2.406944118744319e-05,
+   "correlation": -0.4667371229111607,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "mu_c",
+   "hessian": -106730.97210567171,
+   "covariance": 7.580640149153079e-05,
+   "correlation": 0.7044826939259925,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "shape",
+   "hessian": -1478.6216744409196,
+   "covariance": 0.00017341957503963986,
+   "correlation": 0.36669554239408264,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "characteristic_time",
+   "hessian": -24.009394407673035,
+   "covariance": -0.00018701724465438035,
+   "correlation": -0.4199740671209913,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "peak_amplitude",
+   "hessian": -6902.5437934468455,
+   "covariance": -2.198384542581815e-05,
+   "correlation": -0.2116758221283601,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "alpha",
+   "parameter_2": "tau",
+   "hessian": 391024.2313948151,
+   "covariance": -2.9385708329038247e-05,
+   "correlation": -0.8278570011749644,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "alpha",
+   "hessian": -89616.534106714,
+   "covariance": -2.4069441187443146e-05,
+   "correlation": -0.4667371229111599,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "beta",
+   "hessian": 48771.62869699004,
+   "covariance": 6.160206733152906e-05,
+   "correlation": 1.0,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "mu_c",
+   "hessian": 29631.01426990254,
+   "covariance": -7.723575824341532e-05,
+   "correlation": -0.6008709912034785,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "shape",
+   "hessian": -52.99969635673326,
+   "covariance": -8.362788306918267e-05,
+   "correlation": -0.14803247215459436,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "characteristic_time",
+   "hessian": -55.81989112738024,
+   "covariance": 7.521262798499003e-05,
+   "correlation": 0.14139366736586417,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "peak_amplitude",
+   "hessian": -284.7400906669326,
+   "covariance": 2.894540585489638e-05,
+   "correlation": 0.2333165857084069,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "beta",
+   "parameter_2": "tau",
+   "hessian": -94910.85154752464,
+   "covariance": 1.9648939761971457e-05,
+   "correlation": 0.4634006719357908,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "alpha",
+   "hessian": -106730.97210567171,
+   "covariance": 7.580640149153072e-05,
+   "correlation": 0.7044826939259918,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "beta",
+   "hessian": 29631.01426990254,
+   "covariance": -7.723575824341539e-05,
+   "correlation": -0.6008709912034791,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "mu_c",
+   "hessian": 32584.754283657647,
+   "covariance": 0.000268212532292405,
+   "correlation": 1.0,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "shape",
+   "hessian": -320.50825988960696,
+   "covariance": 0.0002233265845724402,
+   "correlation": 0.18945428091461522,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "characteristic_time",
+   "hessian": -577.6213607671527,
+   "covariance": -0.00018587092995209667,
+   "correlation": -0.16745910958126461,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "peak_amplitude",
+   "hessian": 714.6358995550371,
+   "covariance": -3.391646770501551e-05,
+   "correlation": -0.13101912506135546,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "mu_c",
+   "parameter_2": "tau",
+   "hessian": -95760.36681327778,
+   "covariance": -2.7445207617804183e-05,
+   "correlation": -0.31020026803600614,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "alpha",
+   "hessian": -1478.6216744409196,
+   "covariance": 0.00017341957503964049,
+   "correlation": 0.366695542394084,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "beta",
+   "hessian": -52.99969635673326,
+   "covariance": -8.3627883069184e-05,
+   "correlation": -0.14803247215459672,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "mu_c",
+   "hessian": -320.50825988960696,
+   "covariance": 0.00022332658457244192,
+   "correlation": 0.1894542809146167,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "shape",
+   "hessian": 3487.113471673834,
+   "covariance": 0.005180753578516313,
+   "correlation": 1.0,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "characteristic_time",
+   "hessian": 3552.6208143005906,
+   "covariance": -0.004534316744523372,
+   "correlation": -0.9295060603875932,
+   "high_collinearity": true
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "peak_amplitude",
+   "hessian": 4583.649839531253,
+   "covariance": -0.00038843436420058744,
+   "correlation": -0.3414167226598523,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "shape",
+   "parameter_2": "tau",
+   "hessian": -8412.72646030076,
+   "covariance": -0.00013605865131526026,
+   "correlation": -0.3499007516045041,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "alpha",
+   "hessian": -24.009394407673035,
+   "covariance": -0.00018701724465438149,
+   "correlation": -0.41997406712099383,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "beta",
+   "hessian": -55.81989112738024,
+   "covariance": 7.521262798499157e-05,
+   "correlation": 0.1413936673658671,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "mu_c",
+   "hessian": -577.6213607671527,
+   "covariance": -0.00018587092995209903,
+   "correlation": -0.16745910958126675,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "shape",
+   "hessian": 3552.6208143005906,
+   "covariance": -0.004534316744523385,
+   "correlation": -0.9295060603875959,
+   "high_collinearity": true
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "characteristic_time",
+   "hessian": 3893.9976692843875,
+   "covariance": 0.004593315977317833,
+   "correlation": 1.0,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "peak_amplitude",
+   "hessian": 4671.783926269669,
+   "covariance": 0.00010508060994391633,
+   "correlation": 0.09808961653019517,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "characteristic_time",
+   "parameter_2": "tau",
+   "hessian": -8793.904061593112,
+   "covariance": 0.0001567214481088713,
+   "correlation": 0.4280361572509443,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "alpha",
+   "hessian": -6902.5437934468455,
+   "covariance": -2.1983845425817833e-05,
+   "correlation": -0.21167582212835703,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "beta",
+   "hessian": -284.7400906669326,
+   "covariance": 2.8945405854896262e-05,
+   "correlation": 0.23331658570840594,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "mu_c",
+   "hessian": 714.6358995550371,
+   "covariance": -3.391646770501521e-05,
+   "correlation": -0.13101912506135432,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "shape",
+   "hessian": 4583.649839531253,
+   "covariance": -0.000388434364200579,
+   "correlation": -0.34141672265984485,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "characteristic_time",
+   "hessian": 4671.783926269669,
+   "covariance": 0.00010508060994390763,
+   "correlation": 0.09808961653018705,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "peak_amplitude",
+   "hessian": 10506.704212155977,
+   "covariance": 0.00024984621508516443,
+   "correlation": 1.0,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "peak_amplitude",
+   "parameter_2": "tau",
+   "hessian": -18606.286353491265,
+   "covariance": 2.444866678009982e-05,
+   "correlation": 0.28630832458148914,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "alpha",
+   "hessian": 391024.2313948151,
+   "covariance": -2.9385708329038257e-05,
+   "correlation": -0.8278570011749646,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "beta",
+   "hessian": -94910.85154752464,
+   "covariance": 1.9648939761971508e-05,
+   "correlation": 0.46340067193579204,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "mu_c",
+   "hessian": -95760.36681327778,
+   "covariance": -2.744520761780427e-05,
+   "correlation": -0.31020026803600714,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "shape",
+   "hessian": -8412.72646030076,
+   "covariance": -0.00013605865131525964,
+   "correlation": -0.3499007516045025,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "characteristic_time",
+   "hessian": -8793.904061593112,
+   "covariance": 0.00015672144810887026,
+   "correlation": 0.4280361572509415,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "peak_amplitude",
+   "hessian": -18606.286353491265,
+   "covariance": 2.4448666780100084e-05,
+   "correlation": 0.2863083245814922,
+   "high_collinearity": false
+  },
+  {
+   "parameter_1": "tau",
+   "parameter_2": "tau",
+   "hessian": 425404.48377177084,
+   "covariance": 2.9185667941028736e-05,
+   "correlation": 1.0,
+   "high_collinearity": false
+  }
+ ],
+ "plotUrl": "/runs/curvature_DMC/parameter_curvature.png",
+ "estimateCsv": "/runs/curvature_DMC/parameter_curvature_matrix.csv"
+}
